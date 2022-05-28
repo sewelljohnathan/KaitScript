@@ -34,3 +34,4 @@ typedef struct variable {
 
 
 lexeme* generateLexList(char* input);
+int interpretLexList(lexeme* lexList);

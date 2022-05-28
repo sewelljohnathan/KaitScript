@@ -75,6 +75,9 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Run the interpreter
+    return interpretLexList(lexList);
+
 }
 
 void printHelp() {
