@@ -26,6 +26,15 @@ typedef struct lexeme {
 } lexeme;
 
 
+typedef struct funcParam {
+
+    char name[MAX_VARIABLE_NAME_LENGTH];
+    int isNum;
+    int isText;
+
+} funcParam;
+
+
 typedef struct variable {
     char name[MAX_VARIABLE_NAME_LENGTH];
     int isNum;
@@ -37,15 +46,6 @@ typedef struct variable {
     funcParam funcParams[MAX_FUNC_PARAMS]
 
 } variable;
-
-
-typedef struct funcParam {
-
-    char name[MAX_VARIABLE_NAME_LENGTH];
-    int isNum;
-    int isText;
-
-} funcParam;
 
 
 lexeme* generateLexList(char* input);
