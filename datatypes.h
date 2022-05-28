@@ -1,7 +1,9 @@
 #define MAX_VARIABLE_NAME_LENGTH 20
 #define MAX_VARIABLE_COUNT 10
 #define MAX_RAWTEXT_LENGTH 100
+#define MAX_FUNC_PARAMS 10
 #define MAX_LEXEME_LIST_LENGTH 100
+
 
 
 typedef enum sym_type {
@@ -28,10 +30,22 @@ typedef struct variable {
     char name[MAX_VARIABLE_NAME_LENGTH];
     int isNum;
     int isText;
+    int isFunc;
     double numVal;
     char textVal[MAX_RAWTEXT_LENGTH];
+    int funcStart;
+    funcParam funcParams[MAX_FUNC_PARAMS]
 
 } variable;
+
+
+typedef struct funcParam {
+
+    char name[MAX_VARIABLE_NAME_LENGTH];
+    int isNum;
+    int isText;
+
+} funcParam;
 
 
 lexeme* generateLexList(char* input);
