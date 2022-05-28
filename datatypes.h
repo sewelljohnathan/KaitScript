@@ -23,4 +23,14 @@ typedef struct lexeme {
 } lexeme;
 
 
+typedef struct variable {
+    char name[MAX_VARIABLE_NAME_LENGTH];
+    int isNum;
+    int isText;
+    double numVal;
+    char textVal[MAX_RAWTEXT_LENGTH];
+
+} variable;
+
+
 lexeme* generateLexList(char* input);
