@@ -43,7 +43,7 @@ typedef struct variable {
     double numVal;
     char textVal[MAX_RAWTEXT_LENGTH];
     int funcStart;
-    funcParam funcParams[MAX_FUNC_PARAMS]
+    funcParam funcParams[MAX_FUNC_PARAMS];
 
 } variable;
 
