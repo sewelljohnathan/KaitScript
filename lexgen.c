@@ -154,8 +154,8 @@ sym_type checkReservedSyms(char* name) {
     if (strcmp(name, "text") == 0) {
         return textsym;
     }
-    if (strcmp(name, "action") == 0) {
-        return actionsym;
+    if (strcmp(name, "function") == 0) {
+        return functionsym;
     }
     if (strcmp(name, "return") == 0) {
         return returnsym;
