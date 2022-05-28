@@ -29,6 +29,7 @@ int main(int argc, char* argv[]) {
 
     // Get the command line input
     int printLexList = 0;
+    int printVarTable = 0;
     char cmd;
     while ((cmd = getopt(argc, argv, "hl")) != -1) {
         switch (cmd) {
@@ -38,6 +39,9 @@ int main(int argc, char* argv[]) {
             break;
             case 'l':
                 printLexList = 1;
+            break;
+            case 't':
+                printVarTable = 1;
             break;
         }
     }
@@ -76,7 +80,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Run the interpreter
-    return interpretLexList(lexList);
+    return interpretLexList(lexList, printVarTable);
 
 }
 
