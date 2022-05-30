@@ -178,7 +178,7 @@ sym_type checkOtherSyms(int* inputIndex, char* input) {
 
         case '+': curSym = plussym; break;
         case '-': curSym = subsym; break;
-        case '*': curSym = mulsym; break;
+        case '*': curSym = multsym; break;
         case '/': curSym = divsym; break;
         
         case '(': curSym = lparensym; break;

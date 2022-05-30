@@ -9,7 +9,7 @@
 const char* symNameList[] = {
     "numsym", "textsym", "identsym", "rawnumsym", "rawtextsym", "assignsym", "functionsym",
     "lparensym", "rparensym", "lbracesym", "rbracesym", "lbracketsym", "rbracketsym",
-    "plussym", "subsym", "mulsym", "divsym",
+    "plussym", "subsym", "multsym", "divsym",
     "deqsym", "neqsym", "gtrsym", "geqsym", "lsssym", "leqsym",
     "ifsym", "elifsym", "elsesym", "returnsym",
     "commasym",
