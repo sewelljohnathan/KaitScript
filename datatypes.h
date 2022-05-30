@@ -17,6 +17,11 @@ typedef enum sym_type {
 } sym_type;
 
 
+typedef enum varType {
+    numtype = 1, texttype, nonetype
+} varType;
+
+
 typedef struct lexeme {
     char name[MAX_VARIABLE_NAME_LENGTH];
     double numval;
@@ -29,21 +34,21 @@ typedef struct lexeme {
 typedef struct funcParam {
 
     char name[MAX_VARIABLE_NAME_LENGTH];
-    int isNum;
-    int isText;
+    varType type;
 
 } funcParam;
 
 
 typedef struct variable {
     char name[MAX_VARIABLE_NAME_LENGTH];
-    int isNum;
-    int isText;
+    varType type;
     int isFunc;
+
     double numVal;
     char textVal[MAX_RAWTEXT_LENGTH];
     int funcStart;
     funcParam funcParams[MAX_FUNC_PARAMS];
+    
     int level;
 
 } variable;
