@@ -7,7 +7,7 @@
 
 
 typedef enum sym_type {
-    numsym = 1, textsym, identsym, rawnumsym, rawtextsym, assignsym, functionsym, 
+    numsym = 0, textsym, identsym, rawnumsym, rawtextsym, assignsym, functionsym, 
     lparensym, rparensym, lbracesym, rbracesym, lbracketsym, rbracketsym,
     plussym, subsym, multsym, divsym,
     deqsym, neqsym, gtrsym, geqsym, lsssym, leqsym,
@@ -18,7 +18,7 @@ typedef enum sym_type {
 
 
 typedef enum varType {
-    numtype = 1, texttype, nonetype
+    numtype = 0, texttype, nonetype
 } varType;
 
 
