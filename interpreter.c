@@ -280,9 +280,9 @@ double numExpression() {
     lexeme curLex;
 
     // Shunting yard
-    lexeme* shuntingOutput = malloc(sizeof(lexeme)*10);
+    lexeme* shuntingOutput = malloc(sizeof(lexeme)*50);
     int shuntingOutputIndex = -1;
-    lexeme* shuntingStack = malloc(sizeof(lexeme)*10);
+    lexeme* shuntingStack = malloc(sizeof(lexeme)*50);
     int shuntingStackIndex = -1;
 
     curLex = nextLex();
@@ -351,7 +351,7 @@ double numExpression() {
     */
 
     // Postfix evaluation
-    double* valueStack = malloc(sizeof(double)*10);
+    double* valueStack = malloc(sizeof(double)*50);
     int valueStackIndex = -1;
 
     for (int i = 0; i <= shuntingOutputIndex; i++) {
