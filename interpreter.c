@@ -38,7 +38,7 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
     varLevel = 0;
     
     lexList = input;
-    lexIndex = 0;
+    lexIndex = -1;
 
     while (lexList[lexIndex].sym != -1) {
 
@@ -129,7 +129,7 @@ void printVarTable() {
 }
 
 lexeme nextLex() {
-    return lexList[lexIndex++];
+    return lexList[++lexIndex];
 }
 
 void line() {
@@ -256,7 +256,7 @@ void handleFuncDeclaration() {
 void handleVarAssignment() {
 
     // Variable name
-    lexeme identifier = lexList[lexIndex-1];
+    lexeme identifier = lexList[lexIndex];
 
     // Assignment '='
     lexeme eqlsign = nextLex();
