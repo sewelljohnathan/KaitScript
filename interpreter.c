@@ -358,8 +358,12 @@ double numExpression() {
 
         lexeme nextOutput = shuntingOutput[i];
 
-        if (nextOutput.sym == identsym || nextOutput.sym == rawnumsym) {
+        if (nextOutput.sym == rawnumsym) {
             valueStack[++valueStackIndex] = nextOutput.numval;
+
+        } else if (nextOutput.sym == identsym) {
+            int tableIndex = findVar(nextOutput.name);
+            valueStack[++valueStackIndex] = varTable[tableIndex].numVal;
 
         } else if (isOperator(nextOutput)) {
 
