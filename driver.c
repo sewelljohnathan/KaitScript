@@ -77,6 +77,7 @@ int main(int argc, char* argv[]) {
         while ((curLex = lexList[++lexIndex]).sym != -1) {
             printf("%s | %s\n", symNameList[curLex.sym], curLex.name);
         }
+        printf("\n");
     }
 
     // Run the interpreter
