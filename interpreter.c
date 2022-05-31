@@ -329,7 +329,7 @@ double numExpression() {
         curLex = nextLex();
 
     } while (isOperator(curLex) || curLex.sym == lparensym || curLex.sym == rparensym || curLex.sym == identsym || curLex.sym == rawnumsym);
-
+    lexIndex--;
 
     // Push the remaining operators onto the stack
     while (shuntingStackIndex >= 0) {
