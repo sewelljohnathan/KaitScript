@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     int printLexList = 0;
     int printVarTable = 0;
     char cmd;
-    while ((cmd = getopt(argc, argv, "hl")) != -1) {
+    while ((cmd = getopt(argc, argv, "hlt")) != -1) {
         switch (cmd) {
             case 'h':
                 printHelp();
