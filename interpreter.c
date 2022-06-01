@@ -285,6 +285,10 @@ double numExpression() {
     lexeme* shuntingStack = malloc(sizeof(lexeme)*50);
     int shuntingStackIndex = -1;
 
+    int addSubAfterParen = 0;
+    int negateNum = 0;
+    int pastFirst = 0;
+
     curLex = nextLex();
     do {
         
@@ -307,25 +311,68 @@ double numExpression() {
             }
             shuntingStackIndex--;
 
-        } else if (isOperator(curLex)) {
+            if (addSubAfterParen > 0) {
+                lexeme subber;
+                subber.sym = subsym;
+                shuntingOutput[++shuntingOutputIndex] = subber;
 
-            // Pop operators until a higher one is found
-            while (operatorPrecedence(shuntingStack[shuntingStackIndex]) >= operatorPrecedence(curLex)) {
-
-                shuntingOutput[++shuntingOutputIndex] = shuntingStack[shuntingStackIndex];
-                shuntingStackIndex--;
+                addSubAfterParen--;
             }
 
-            // Add the new one to the stack
-            shuntingStack[++shuntingStackIndex] = curLex;
+        } else if (isOperator(curLex)) {
+
+            lexeme prevLex = lexList[lexIndex-1];
+            // https://stackoverflow.com/questions/46861254/infix-to-postfix-for-negative-numbers
+            if (curLex.sym == subsym && (isOperator(prevLex) || prevLex.sym == lparensym || pastFirst == 0)) {
+
+                lexeme afterLex = lexList[lexIndex+1];
+
+                // If the next lex is a variable, simply negate it later
+                if (afterLex.sym == identsym || afterLex.sym == rawnumsym) {
+                    negateNum = 1;
+                
+                // If the next lex is '(', then prepare the negation
+                } else if (afterLex.sym == lparensym) {
+                    lexeme zero;
+                    zero.sym = rawnumsym;
+                    zero.numval = 0;
+
+                    shuntingOutput[++shuntingOutputIndex] = zero;
+        
+                    addSubAfterParen++;
+                }
+            
+            } else {
+                // Pop operators until a higher one is found
+                while (operatorPrecedence(shuntingStack[shuntingStackIndex]) >= operatorPrecedence(curLex)) {
+
+                    shuntingOutput[++shuntingOutputIndex] = shuntingStack[shuntingStackIndex];
+                    shuntingStackIndex--;
+                }
+
+                // Add the new one to the stack
+                shuntingStack[++shuntingStackIndex] = curLex;
+            }  
         
         } else if (curLex.sym == rawnumsym) {
+
             shuntingOutput[++shuntingOutputIndex] = curLex;
+
+            if (negateNum) { 
+                shuntingOutput[shuntingOutputIndex].numval *= -1;
+                negateNum = 0;
+            }
     
         } else if (curLex.sym == identsym) {
             shuntingOutput[++shuntingOutputIndex] = curLex;
+
+            if (negateNum) { 
+                shuntingOutput[shuntingOutputIndex].numval *= -1;
+                negateNum = 0;
+            }
         }
 
+        pastFirst = 1;
         curLex = nextLex();
 
     } while (isOperator(curLex) || curLex.sym == lparensym || curLex.sym == rparensym || curLex.sym == identsym || curLex.sym == rawnumsym);
@@ -337,8 +384,8 @@ double numExpression() {
         shuntingStackIndex--;
     }
 
-    /*
-    STACK DEBUGGING
+    ///*
+    //STACK DEBUGGING
     for (int i = 0; i <= shuntingOutputIndex; i++) {
 
         lexeme lex = shuntingOutput[i];
@@ -348,7 +395,7 @@ double numExpression() {
             printf("%lf | %d\n", lex.numval, lex.sym);
         }
     }
-    */
+    //*/
 
     // Postfix evaluation
     double* valueStack = malloc(sizeof(double)*50);
@@ -375,6 +422,12 @@ double numExpression() {
                 case subsym: newValue = prevValue2 - prevValue1; break;
                 case multsym: newValue = prevValue2 * prevValue1; break;
                 case divsym: newValue = prevValue2 / prevValue1; break;
+                case expsym: 
+                    newValue = prevValue2;
+                    for (int i = 1; i < prevValue1; i++) {
+                        newValue *= prevValue2;
+                    }
+                break;
             }
             valueStack[--valueStackIndex] = newValue;
 
@@ -410,6 +463,7 @@ int isOperator(lexeme lex) {
         case subsym: return 1; break;
         case multsym: return 1; break;
         case divsym: return 1; break;
+        case expsym: return 1; break;
         default: return 0; break;
     }
 }
@@ -419,6 +473,7 @@ int operatorPrecedence(lexeme lex) {
         case subsym: return 1; break;
         case multsym: return 2; break;
         case divsym: return 2; break;
+        case expsym: return 3; break;
         case lparensym: return 0; break;
         default: return -1; break;
     }
