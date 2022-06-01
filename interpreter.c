@@ -279,7 +279,7 @@ double numExpression() {
 
     lexeme curLex;
 
-    // Shunting yard
+    // Shunting yard, modified to allow for negation
     lexeme* shuntingOutput = malloc(sizeof(lexeme)*50);
     int shuntingOutputIndex = -1;
     lexeme* shuntingStack = malloc(sizeof(lexeme)*50);
