@@ -180,6 +180,7 @@ sym_type checkOtherSyms(int* inputIndex, char* input) {
         case '-': curSym = subsym; break;
         case '*': curSym = multsym; break;
         case '/': curSym = divsym; break;
+        case '^': curSym = expsym; break;
         
         case '(': curSym = lparensym; break;
         case ')': curSym = rparensym; break;
