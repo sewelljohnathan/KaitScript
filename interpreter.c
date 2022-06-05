@@ -384,7 +384,7 @@ double numExpression() {
         shuntingStackIndex--;
     }
 
-    ///*
+    /*
     //STACK DEBUGGING
     for (int i = 0; i <= shuntingOutputIndex; i++) {
 
@@ -395,7 +395,7 @@ double numExpression() {
             printf("%lf | %d\n", lex.numval, lex.sym);
         }
     }
-    //*/
+    */
 
     // Postfix evaluation
     double* valueStack = malloc(sizeof(double)*50);
@@ -435,7 +435,6 @@ double numExpression() {
 
     }
 
-    lexIndex--;
     return valueStack[0];
 
 }
