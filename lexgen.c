@@ -61,9 +61,9 @@ lexeme* generateLexList(char* input) {
         // Number
         else if (isdigit(curChar)) {
 
-            long number = curChar - '0';
+            double number = (double) curChar - '0';
             int foundDecimal = 0;
-            int decimalModifier;
+            double decimalModifier = 0.1;
 
             while (1) {
                 curChar = input[++inputIndex];
@@ -72,7 +72,7 @@ lexeme* generateLexList(char* input) {
 
                     // Adding digits before the decimal point
                     if (!foundDecimal) {
-                        number = curLex.numval*10 + (curChar - '0');
+                        number = number*10 + (curChar - '0');
 
                     // Add digits after the decimal point
                     } else {
@@ -83,7 +83,6 @@ lexeme* generateLexList(char* input) {
                 // Found the decimal point
                 } else if (curChar == '.') {
                     foundDecimal = 1;
-                    decimalModifier = 0.1;
                 
                 } else {
                     curLex.numval = number;
