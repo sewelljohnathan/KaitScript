@@ -54,3 +54,6 @@ dkms.conf
 # Kait Programs
 *.kait
 kait
+
+# Development
+devtest.c
