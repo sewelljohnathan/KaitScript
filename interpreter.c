@@ -22,7 +22,7 @@ void handleTextDeclaration();
 void handleFuncDeclaration();
 void handleVarAssignment();
 double numExpression();
-char* textExpression();
+void textExpression();
 double runFuncNum();
 char* runFuncText();
 void runFuncNone();
@@ -179,7 +179,9 @@ void handleTextDeclaration() {
     if (eqlsign.sym != assignsym) { return; }
 
     // Create the new variable
-    addTextVar(identifier.name, textExpression());
+    char text[MAX_RAWTEXT_LENGTH] = "";
+    textExpression(text);
+    addTextVar(identifier.name, text);
 
 }
 
@@ -270,8 +272,8 @@ void handleVarAssignment() {
         double value = numExpression();
         varTable[tableIndex].numVal = value;
     } else if (curVar.type == texttype) {
-        char* text = textExpression();
-        strcpy(varTable[tableIndex].textVal, text);
+        //char* text = textExpression();
+        //strcpy(varTable[tableIndex].textVal, text);
     }
 }
 
@@ -440,7 +442,28 @@ double numExpression() {
 }
 
 
-char* textExpression() {
+void textExpression(char* text) {
+
+    lexeme curLex = nextLex();
+
+    do {
+        if (curLex.sym == rawtextsym) {
+            strcat(text, curLex.textval);
+
+        } else if (curLex.sym == identsym) {
+            int tableIndex = findVar(curLex.name);
+            strcat(text, varTable[tableIndex].textVal);
+
+        } else if (curLex.sym == plussym) {
+            // Nothing
+        } else {
+            // Error
+        }
+
+        curLex = nextLex();
+
+    } while (curLex.sym == rawtextsym || curLex.sym == identsym || curLex.sym == plussym);
+    lexIndex--;
 
 }
 
