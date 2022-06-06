@@ -16,7 +16,7 @@ lexeme* generateLexList(char* input) {
     int inputIndex = 0;
     char curChar = input[inputIndex];
     int counter = 0;
-    int row = 0;
+    int row = 1;
 
     // Loop through every character
     while (curChar != '\0') {
