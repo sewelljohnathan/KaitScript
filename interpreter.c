@@ -151,6 +151,10 @@ void line() {
     }
     else if (firstLex.sym == identsym) {
         handleVarAssignment();
+    } else if (firstLex.sym == -1) {
+        return;
+    } else {
+        raiseError(firstLex, "Unexpected token.");
     }
 
 
