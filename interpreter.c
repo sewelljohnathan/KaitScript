@@ -308,7 +308,7 @@ double numExpression() {
             // Grammer Check
             // Previous must be an operator or the first lex
             if (!isOperator(lexList[lexIndex-1]) && pastFirst == 0) {
-                break;
+                raiseError(curLex, "Unexpected \"(\"");
             }
 
             shuntingStack[++shuntingStackIndex] = curLex;
@@ -319,7 +319,7 @@ double numExpression() {
             // Grammer Check
             // Previous cannot be an operator
             if (isOperator(lexList[lexIndex-1])) {
-                break;
+                raiseError(curLex, "Unexpected \")\"");
             }
 
             // Pop operators until '(' is found
@@ -345,9 +345,12 @@ double numExpression() {
         } else if (isOperator(curLex)) {
             
             // Grammer Check
-            // Previous cannot be an operator unless this is a negator
-            if (isOperator(lexList[lexIndex-1]) && !isNegator(lexIndex, pastFirst)) {
-                break;
+            // Previous cannot be an operator unless this is a negator, and cannot be a '('
+            if (
+                !isNegator(lexIndex, pastFirst) &&
+                (lexList[lexIndex-1].sym == lparensym || isOperator(lexList[lexIndex-1]))
+             ) {
+                raiseError(curLex, "Unexpected operator.");
             }
 
             // https://stackoverflow.com/questions/46861254/infix-to-postfix-for-negative-numbers
@@ -387,7 +390,7 @@ double numExpression() {
             // Grammer Check
             // Previous cannot be a number
             if (lexList[lexIndex-1].sym == rawnumsym || lexList[lexIndex-1].sym == identsym) {
-                break;
+                raiseError(curLex, "Unexpected number.");
             }
 
             shuntingOutput[++shuntingOutputIndex] = curLex;
@@ -418,6 +421,9 @@ double numExpression() {
         pastFirst = 1;
         curLex = nextLex();
 
+    }
+    if (isOperator(lexList[lexIndex-1])) {
+        raiseError(lexList[lexIndex-1], "Expected a number.");
     }
     lexIndex--;
 
