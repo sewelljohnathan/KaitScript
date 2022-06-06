@@ -478,12 +478,11 @@ double numExpression() {
 
 }
 
-
 void textExpression(char* text) {
 
     lexeme curLex = nextLex();
+    while (1) {
 
-    do {
         if (curLex.sym == rawtextsym) {
             strcat(text, curLex.textval);
 
@@ -494,12 +493,12 @@ void textExpression(char* text) {
         } else if (curLex.sym == plussym) {
             // Nothing
         } else {
-            // Error
+            break;
         }
 
         curLex = nextLex();
 
-    } while (curLex.sym == rawtextsym || curLex.sym == identsym || curLex.sym == plussym);
+    }
     lexIndex--;
 
 }
