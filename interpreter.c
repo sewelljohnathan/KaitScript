@@ -29,7 +29,12 @@ void runFuncNone();
 lexeme nextLex();
 int isOperator(lexeme lex);
 int operatorPrecedence(lexeme lex);
-
+int isNegator(int index, int pastFirst);
+void raiseError(lexeme lex, char* msg);
+void raiseError(lexeme lex, char* msg) {
+    printf("%s\nFound on row %d\n", msg, lex.row);
+    exit(1);
+}
 
 int interpretLexList(lexeme* input, int printVarTableFlag) {
 
@@ -41,8 +46,7 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
     lexIndex = -1;
 
     while (lexList[lexIndex].sym != -1) {
-
-        line(lexList, &lexIndex);
+        line();
     }
 
     if (printVarTableFlag) {
@@ -292,14 +296,27 @@ double numExpression() {
     int pastFirst = 0;
 
     curLex = nextLex();
-    do {
+    while (1) {
         
         // '('
         if (curLex.sym == lparensym) {
+            
+            // Grammer Check
+            // Previous must be an operator or the first lex
+            if (!isOperator(lexList[lexIndex-1]) && pastFirst == 0) {
+                break;
+            }
+
             shuntingStack[++shuntingStackIndex] = curLex;
 
         // ')'
         } else if (curLex.sym == rparensym) {
+
+            // Grammer Check
+            // Previous cannot be an operator
+            if (isOperator(lexList[lexIndex-1])) {
+                break;
+            }
 
             // Pop operators until '(' is found
             while (1) {
@@ -322,10 +339,15 @@ double numExpression() {
             }
 
         } else if (isOperator(curLex)) {
+            
+            // Grammer Check
+            // Previous cannot be an operator unless this is a negator
+            if (isOperator(lexList[lexIndex-1]) && !isNegator(lexIndex, pastFirst)) {
+                break;
+            }
 
-            lexeme prevLex = lexList[lexIndex-1];
             // https://stackoverflow.com/questions/46861254/infix-to-postfix-for-negative-numbers
-            if (curLex.sym == subsym && (isOperator(prevLex) || prevLex.sym == lparensym || pastFirst == 0)) {
+            if (isNegator(lexIndex, pastFirst)) {
 
                 lexeme afterLex = lexList[lexIndex+1];
 
@@ -358,6 +380,12 @@ double numExpression() {
         
         } else if (curLex.sym == rawnumsym) {
 
+            // Grammer Check
+            // Previous cannot be a number
+            if (lexList[lexIndex-1].sym == rawnumsym || lexList[lexIndex-1].sym == identsym) {
+                break;
+            }
+
             shuntingOutput[++shuntingOutputIndex] = curLex;
 
             if (negateNum) { 
@@ -366,18 +394,27 @@ double numExpression() {
             }
     
         } else if (curLex.sym == identsym) {
+
+            // Grammer Check
+            // Previous cannot be a number
+            if (lexList[lexIndex-1].sym == rawnumsym || lexList[lexIndex-1].sym == identsym) {
+                break;
+            }
+
             shuntingOutput[++shuntingOutputIndex] = curLex;
 
             if (negateNum) { 
                 shuntingOutput[shuntingOutputIndex].numval *= -1;
                 negateNum = 0;
             }
+        } else {
+            break;
         }
 
         pastFirst = 1;
         curLex = nextLex();
 
-    } while (isOperator(curLex) || curLex.sym == lparensym || curLex.sym == rparensym || curLex.sym == identsym || curLex.sym == rawnumsym);
+    }
     lexIndex--;
 
     // Push the remaining operators onto the stack
@@ -499,4 +536,12 @@ int operatorPrecedence(lexeme lex) {
         case lparensym: return 0; break;
         default: return -1; break;
     }
+}
+int isNegator(int index, int pastFirst) {
+    lexeme curLex = lexList[index];
+    lexeme prevLex = lexList[index-1];
+    if (curLex.sym == subsym && (isOperator(prevLex) || prevLex.sym == lparensym || pastFirst == 0)) {
+        return 1;
+    }
+    return 0;
 }
