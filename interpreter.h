@@ -1,5 +1,12 @@
 #include "datatypes.h"
 
+variable* varTable;
+int varTableIndex;
+int varLevel;
+
+lexeme* lexList;
+int lexIndex;
+
 void line();
 void addNumVar(char* name, double value);
 void addTextVar(char* name, char* text);
