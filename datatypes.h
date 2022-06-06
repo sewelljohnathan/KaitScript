@@ -27,6 +27,7 @@ typedef struct lexeme {
     double numval;
     char textval[MAX_RAWTEXT_LENGTH];
     sym_type sym;
+    int row;
 
 } lexeme;
 

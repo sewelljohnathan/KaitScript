@@ -16,11 +16,18 @@ lexeme* generateLexList(char* input) {
     int inputIndex = 0;
     char curChar = input[inputIndex];
     int counter = 0;
+    int row = 0;
 
     // Loop through every character
     while (curChar != '\0') {
 
         lexeme curLex = (const struct lexeme) { 0 };
+
+        if (curChar == '\n') {
+            row++;
+        }
+
+        curLex.row = row;
 
         // Whitespace
         if (iscntrl(curChar) || isspace(curChar)) {
