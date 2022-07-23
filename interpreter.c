@@ -172,8 +172,9 @@ void handleVarAssignment() {
         double value = numExpression();
         varTable[tableIndex].numVal = value;
     } else if (curVar.type == texttype) {
-        //char* text = textExpression();
-        //strcpy(varTable[tableIndex].textVal, text);
+        char text[MAX_RAWTEXT_LENGTH] = "";
+        textExpression(text);
+        addTextVar(identifier.name, text);
     }
 }
 
