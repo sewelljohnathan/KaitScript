@@ -86,17 +86,17 @@ int main(int argc, char* argv[]) {
 }
 
 void printHelp() {
-    /*
+    printf("\n");
     printf("██╗░░██╗░█████╗░██╗████████╗\n");
     printf("██║░██╔╝██╔══██╗██║╚══██╔══╝\n");
     printf("█████═╝░███████║██║░░░██║░░░\n");
     printf("██╔═██╗░██╔══██║██║░░░██║░░░\n");
     printf("██║░╚██╗██║░░██║██║░░░██║░░░\n");
     printf("╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░░╚═╝░░░\n");
-    */
-    printf("Kait Programming Language\n");
-    printf("=========================\n");
+    printf("\n");
     printf("Usage: kait [file] [options]\nOptions:\n");
-    printf(" %-20s %s\n", "-h", "Shows this message and exits.");
+    printf(" %-10s %s\n", "-h", "Shows this message and exits.");
+    printf(" %-10s %s\n", "-l", "Shows the lexeme list generated from the file.");
+    printf(" %-10s %s\n", "-h", "Shows var table produced through the execution.");
 }
 
