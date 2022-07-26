@@ -174,7 +174,7 @@ void handleVarAssignment() {
     } else if (curVar.type == texttype) {
         char text[MAX_RAWTEXT_LENGTH] = "";
         textExpression(text);
-        addTextVar(identifier.name, text);
+        strcpy(varTable[tableIndex].textVal, text);
     }
 }
 
@@ -386,18 +386,34 @@ double numExpression() {
 
 void textExpression(char* text) {
 
+    int seenFirstSym = 0;
+
     lexeme curLex = nextLex();
     while (1) {
 
-        if (curLex.sym == rawtextsym) {
+        // Do nothing if there is a plus sign (appending is done below)
+        // Check if this is an illegal plus sign at the start
+        if (curLex.sym == plussym) {
+            if (seenFirstSym == 0) {
+                raiseError(curLex, "Expected a number.");
+            }
+
+        } else if (curLex.sym == rawtextsym) {
+            // Check if there is no plus sign before.
+            if (seenFirstSym == 1 && lexList[lexIndex-1].sym != plussym) {
+                break;
+            }
             strcat(text, curLex.textval);
+            seenFirstSym = 1;
 
         } else if (curLex.sym == identsym) {
+            if (seenFirstSym == 1 && lexList[lexIndex-1].sym != plussym) {
+                break;
+            }
             int tableIndex = findVar(curLex.name);
             strcat(text, varTable[tableIndex].textVal);
+            seenFirstSym = 1;
 
-        } else if (curLex.sym == plussym) {
-            // Nothing
         } else {
             break;
         }
