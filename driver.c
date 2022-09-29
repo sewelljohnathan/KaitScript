@@ -97,6 +97,6 @@ void printHelp() {
     printf("Usage: kait [file] [options]\nOptions:\n");
     printf(" %-10s %s\n", "-h", "Shows this message and exits.");
     printf(" %-10s %s\n", "-l", "Shows the lexeme list generated from the file.");
-    printf(" %-10s %s\n", "-h", "Shows var table produced through the execution.");
+    printf(" %-10s %s\n", "-t", "Shows var table produced through the execution.");
 }
 
