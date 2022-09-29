@@ -169,6 +169,9 @@ sym_type checkReservedSyms(char* name) {
     if (strcmp(name, "loop") == 0) {
         return loopsym;
     }
+    if (strcmp(name, "from") == 0) {
+        return fromsym;
+    }
     if (strcmp(name, "to") == 0) {
         return tosym;
     }
