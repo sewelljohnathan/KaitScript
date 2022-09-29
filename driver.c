@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include "datatypes.h"
 
+#define VERSION "0.3.0"
+
 #define MAX_FILE_LENGTH 10000
 
 const char* symNameList[] = {
@@ -31,10 +33,14 @@ int main(int argc, char* argv[]) {
     int printLexList = 0;
     int printVarTable = 0;
     char cmd;
-    while ((cmd = getopt(argc, argv, "hlt")) != -1) {
+    while ((cmd = getopt(argc, argv, "hvlt")) != -1) {
         switch (cmd) {
             case 'h':
                 printHelp();
+                return 0;
+            break;
+            case 'v':
+                printf("Kait %s\n", VERSION);
                 return 0;
             break;
             case 'l':
@@ -96,6 +102,7 @@ void printHelp() {
     printf("\n");
     printf("Usage: kait [file] [options]\nOptions:\n");
     printf(" %-10s %s\n", "-h", "Shows this message and exits.");
+    printf(" %-10s %s\n", "-v", "Shows the version number.");
     printf(" %-10s %s\n", "-l", "Shows the lexeme list generated from the file.");
     printf(" %-10s %s\n", "-t", "Shows var table produced through the execution.");
 }
