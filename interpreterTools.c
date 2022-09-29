@@ -58,6 +58,7 @@ void addNumVar(char* name, double value) {
     curVar->type = numtype;
     curVar->isFunc = 0;
     curVar->numVal = value;
+    curVar->level = varLevel;
 }
 
 void addTextVar(char* name, char* text) {
@@ -67,6 +68,7 @@ void addTextVar(char* name, char* text) {
     curVar->type = texttype;
     curVar->isFunc = 0;
     strcpy(curVar->textVal, text);
+    curVar->level = varLevel;
 }
 
 void addFuncVar(char* name, funcParam* funcParams, int funcParamLength, int funcStart, varType type) {
@@ -80,6 +82,7 @@ void addFuncVar(char* name, funcParam* funcParams, int funcParamLength, int func
         curVar->funcParams[i] = funcParams[i];
     }
     curVar->funcStart = funcStart;
+    curVar->level = varLevel;
 }
 
 int isOperator(lexeme lex) {
