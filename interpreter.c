@@ -30,7 +30,7 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
 
 void line() {
     
-    lexeme firstLex = nextLex();
+    lexeme firstLex = nextLex();printf("%d | %s\n", firstLex.sym, firstLex.name);
 
     if (firstLex.sym == numsym) {  
         handleNumDeclaration();
@@ -43,7 +43,11 @@ void line() {
     }
     else if (firstLex.sym == identsym) {
         handleVarAssignment();
-    } else if (firstLex.sym == -1) {
+    } 
+    else if (firstLex.sym == loopsym) {
+        handleLoop();
+    }
+    else if (firstLex.sym == -1) {
         return;
     } else {
         raiseError(firstLex, "Unexpected token.");
@@ -176,6 +180,63 @@ void handleVarAssignment() {
         textExpression(text);
         strcpy(varTable[tableIndex].textVal, text);
     }
+
+    printf("%d\n", lexList[lexIndex+1].sym);
+}
+
+void handleLoop() {
+
+    varLevel++;
+
+    // Loop keyword
+    lexeme loop = lexList[lexIndex];
+    int start, end;
+
+    // counter variable
+    lexeme identifier = nextLex();
+    if (identifier.sym != identsym) { return; }
+
+    addNumVar(identifier.name, 0);
+    int tableIndex = varTableIndex;
+
+    // From keyword
+    lexeme from = nextLex();
+
+    // Get the start number
+    start = numExpression();
+
+    // To keyword
+    lexeme to = nextLex();
+
+    // Get the end number
+    end = numExpression();
+   
+    // {
+    lexeme lbrace = nextLex();
+    if (lbrace.sym != lbracesym) { return; }
+
+    // Do the loop
+    int startLexIndex = lexIndex;
+    for (int i = start; i <= end; i++) {
+
+        // Increase the built in variable
+        varTable[tableIndex].numVal = i;
+
+        // Do the loop
+        lexIndex = startLexIndex;
+        while (lexList[lexIndex+1].sym != rbracesym) {
+            line();
+        }
+        
+    }
+    
+    // }
+    lexeme rbrace = nextLex();
+    if (rbrace.sym != rbracesym) { return; }
+
+    markVars();
+    varLevel--;
+    
 }
 
 double numExpression() {

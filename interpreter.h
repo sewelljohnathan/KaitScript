@@ -18,6 +18,7 @@ void handleNumDeclaration();
 void handleTextDeclaration();
 void handleFuncDeclaration();
 void handleVarAssignment();
+void handleLoop();
 double numExpression();
 void textExpression();
 double runFuncNum();
