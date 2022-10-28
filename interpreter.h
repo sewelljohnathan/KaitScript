@@ -21,7 +21,7 @@ void handleNumDeclaration();
 void handleTextDeclaration();
 void handleFuncDeclaration();
 void handleVarAssignment();
-void handleFuncCall();
+void handleFuncCall(lexeme identifier);
 void handleLoop();
 void handleReturn();
 double numExpression();

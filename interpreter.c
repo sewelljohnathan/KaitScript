@@ -108,7 +108,9 @@ void handleFuncDeclaration() {
 
     // Get the list of function parameters
     lexeme paramType = nextLex();
-    while (1) {
+    int isParams = 1;
+    if (paramType.sym == rparensym) { isParams = 0; }
+    while (isParams) {
         
         // Param name
         lexeme paramIdentifier = nextLex();
@@ -188,14 +190,12 @@ void handleVarAssignment() {
             strcpy(varTable[tableIndex].textVal, text);
         }
     } else {
-        handleFuncCall();
+        handleFuncCall(identifier);
     }
 
 }
 
-void handleFuncCall() {
-
-    lexeme identifier = lexList[lexIndex];
+void handleFuncCall(lexeme identifier) {
 
     // Get the table entry
     int tableIndex = findVar(identifier.name);
@@ -228,6 +228,12 @@ void handleFuncCall() {
         )) {
             raiseError(commaOrRparen, "Should be a \",\" or \")\"");
         }
+    }
+
+    // Make sure you get the closing ) if no args
+    if (funcVar.funcParamsLength == 0) {
+        lexeme rparen = nextLex();
+        if (rparen.sym != rparensym) { raiseError(rparen, "No closing \")\""); }
     }
 
     int oldIndex = lexIndex;
@@ -456,7 +462,22 @@ double numExpression() {
                 break;
             }
 
-            shuntingOutput[++shuntingOutputIndex] = curLex;
+            int tableIndex = findVar(curLex.name);
+            variable curVar = varTable[tableIndex];
+
+            if (curVar.isFunc) {
+                handleFuncCall(curLex);
+
+                // Hacky; force the return value into a new lex
+                lexeme insertLex;
+                insertLex.sym = rawnumsym;
+                insertLex.numval = returnNum;
+
+                shuntingOutput[++shuntingOutputIndex] = insertLex;
+            }
+            else {
+                shuntingOutput[++shuntingOutputIndex] = curLex;
+            }
 
             if (negateNum) { 
                 shuntingOutput[shuntingOutputIndex].numval *= -1;
@@ -563,7 +584,15 @@ void textExpression(char* text) {
                 break;
             }
             int tableIndex = findVar(curLex.name);
-            strcat(text, varTable[tableIndex].textVal);
+            variable curVar = varTable[tableIndex];
+
+            if (curVar.isFunc) {
+                handleFuncCall(curLex);
+                strcat(text, returnText);
+            } else {
+                strcat(text, curVar.textVal);
+            }
+
             seenFirstSym = 1;
 
         } else {
