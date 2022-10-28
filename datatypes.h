@@ -49,6 +49,7 @@ typedef struct variable {
     char textVal[MAX_RAWTEXT_LENGTH];
     int funcStart;
     funcParam funcParams[MAX_FUNC_PARAMS];
+    int funcParamsLength;
     
     int level;
 

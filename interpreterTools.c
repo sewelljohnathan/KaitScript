@@ -71,16 +71,16 @@ void addTextVar(char* name, char* text) {
     curVar->level = varLevel;
 }
 
-void addFuncVar(char* name, funcParam* funcParams, int funcParamLength, int funcStart, varType type) {
+void addFuncVar(char* name, funcParam* funcParams, int funcParamLength, int funcStart) {
 
     variable* curVar = &varTable[++varTableIndex];
     strcpy(curVar->name, name);
-    curVar->type = type;
     curVar->isFunc = 1;
 
     for (int i = 0; i < funcParamLength; i++) {
         curVar->funcParams[i] = funcParams[i];
     }
+    curVar->funcParamsLength = funcParamLength;
     curVar->funcStart = funcStart;
     curVar->level = varLevel;
 }

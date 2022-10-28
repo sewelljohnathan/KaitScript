@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 void raiseError(lexeme lex, char* msg) {
-    printf("%s\nFound on row %d\n", msg, lex.row);
+    printf("%s\nFound \"%d\" on row %d\n", msg, lex.sym, lex.row);
     exit(1);
 }
 
@@ -30,7 +30,7 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
 
 void line() {
     
-    lexeme firstLex = nextLex();printf("%d | %s\n", firstLex.sym, firstLex.name);
+    lexeme firstLex = nextLex();printf("%d | %d | %s\n", firstLex.sym, firstLex.row, firstLex.name);
 
     if (firstLex.sym == numsym) {  
         handleNumDeclaration();
@@ -93,26 +93,26 @@ void handleFuncDeclaration() {
 
     // Function name
     lexeme identifier = nextLex();
-    if (identifier.sym != identsym) { return; }
+    if (identifier.sym != identsym) { raiseError(identifier, "Not an identifier"); }
 
-    // Openign Paren
+    // Opening Paren
     lexeme lparen = nextLex();
-    if (lparen.sym != lparensym) { return; }
+    if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
 
     // Initialize some values
     funcParam funcParams[MAX_FUNC_PARAMS];
-    int funcParamLength = -1;
+    int funcParamLength = 0;
 
     // Get the list of function parameters
     lexeme paramType = nextLex();
-    while (paramType.sym != rparensym) {
+    while (1) {
         
         // Param name
         lexeme paramIdentifier = nextLex();
-        if (paramIdentifier.sym != identsym) { return; }       
+        if (paramIdentifier.sym != identsym) { raiseError(paramIdentifier, "Not an identifier"); }       
 
         // Add the param to the list
-        funcParam* curParam = &funcParams[++funcParamLength];
+        funcParam* curParam = &funcParams[funcParamLength++];
         strcpy(curParam->name, paramIdentifier.name);
 
         if (paramType.sym == numsym) {
@@ -131,32 +131,34 @@ void handleFuncDeclaration() {
             paramType = nextLex();
 
         } else if (paramEnd.sym != rparensym) {
-            // Error
-            return;
+            raiseError(paramEnd, "No closing \")\"");
 
+        } else {
+            break;
         }
     }
 
-    lexeme funcType = nextLex();
-    varType type;
-    if (funcType.sym == numsym) {
-        type = numtype;
-    } else if (funcType.sym == textsym) {
-        type = texttype;
-    } else if (funcType.sym == lbracesym) {
-        type = nonetype;
-        lexIndex--;
-    } else {
-        // ERROR
-    }
-
-    // The opening brace of the function
-    lexeme lbrace = nextLex();
-    if (lbrace.sym != lbracesym) { return; }
-
     // Add the function to the table
-    addFuncVar(identifier.name, funcParams, funcParamLength, lexIndex, type);
+    addFuncVar(identifier.name, funcParams, funcParamLength, lexIndex+2);
 
+    // Pass through all of the rest of the function
+    int nestedLevel = 0;
+    lexeme next = nextLex();
+    while (1) {
+
+        if (next.sym == lbracesym) {
+            nestedLevel++;
+        }
+        if (next.sym == rbracesym) {
+            nestedLevel--;
+        }
+        if (next.sym == rbracesym && nestedLevel == 0) {
+            break;
+        }
+
+        next = nextLex();
+    }
+    
 }
 
 void handleVarAssignment() {
@@ -164,24 +166,82 @@ void handleVarAssignment() {
     // Variable name
     lexeme identifier = lexList[lexIndex];
 
-    // Assignment '='
-    lexeme eqlsign = nextLex();
-    if (eqlsign.sym != assignsym) { return; }
-
     // Assign the value
     int tableIndex = findVar(identifier.name);
     variable curVar = varTable[tableIndex];
 
-    if (curVar.type == numtype) {
-        double value = numExpression();
-        varTable[tableIndex].numVal = value;
-    } else if (curVar.type == texttype) {
-        char text[MAX_RAWTEXT_LENGTH] = "";
-        textExpression(text);
-        strcpy(varTable[tableIndex].textVal, text);
+    if (!curVar.isFunc) {
+
+        // Assignment '='
+        lexeme eqlsign = nextLex();
+        if (eqlsign.sym != assignsym) { return; }
+
+        if (curVar.type == numtype) {
+            double value = numExpression();
+            varTable[tableIndex].numVal = value;
+        } else if (curVar.type == texttype) {
+            char text[MAX_RAWTEXT_LENGTH] = "";
+            textExpression(text);
+            strcpy(varTable[tableIndex].textVal, text);
+        }
+    } else {
+        handleFuncCall();
     }
 
-    printf("%d\n", lexList[lexIndex+1].sym);
+}
+
+void handleFuncCall() {
+
+    lexeme identifier = lexList[lexIndex];
+
+    // Get the table entry
+    int tableIndex = findVar(identifier.name);
+    variable funcVar = varTable[tableIndex];
+
+    // Opening Paren
+    lexeme lparen = nextLex();
+    if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
+
+    // Loop through all the arguments
+    varLevel++;
+    for (int i = 0; i < funcVar.funcParamsLength; i++) {
+        
+        lexeme arg = nextLex();
+
+        // Copy the arg values into new variables with the param names
+        if (funcVar.funcParams[i].type == numtype) {
+            addNumVar(funcVar.funcParams[i].name, arg.numval);
+
+        } else if (funcVar.funcParams[i].type == texttype) {
+            addTextVar(funcVar.funcParams[i].name, arg.textval);
+        
+        }
+
+        // Check if the next symbol is a command, or a ')' if this is the last arg
+        lexeme commaOrRparen = nextLex();
+        if (!(
+            (i < funcVar.funcParamsLength-1 && commaOrRparen.sym == commasym) ||
+            (i == funcVar.funcParamsLength-1 && commaOrRparen.sym == rparensym)
+        )) {
+            raiseError(commaOrRparen, "Should be a \",\" or \")\"");
+        }
+    }
+
+    int oldIndex = lexIndex;
+    // Run the function
+    lexIndex = funcVar.funcStart-1;
+    while (lexList[lexIndex+1].sym != rbracesym) {
+        line();
+    }
+
+    // }
+    lexeme rbrace = nextLex();
+    if (rbrace.sym != rbracesym) { raiseError(rbrace, "No closing \"}\""); }
+
+    markVars();
+    varLevel--;
+    lexIndex = oldIndex;
+    
 }
 
 void handleLoop() {
@@ -219,7 +279,7 @@ void handleLoop() {
     int startLexIndex = lexIndex;
     for (int i = start; i <= end; i++) {
 
-        // Increase the built in variable
+        // Increase the counter variable
         varTable[tableIndex].numVal = i;
 
         // Do the loop
@@ -483,17 +543,5 @@ void textExpression(char* text) {
 
     }
     lexIndex--;
-
-}
-
-double runFuncNum() {
-
-}
-
-char* runFuncText() {
-
-}
-
-void runFuncNone() {
 
 }
