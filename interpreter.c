@@ -47,6 +47,9 @@ void line() {
     else if (firstLex.sym == loopsym) {
         handleLoop();
     }
+    else if (firstLex.sym == returnsym) {
+        handleReturn();
+    }
     else if (firstLex.sym == -1) {
         return;
     } else {
@@ -297,6 +300,34 @@ void handleLoop() {
     markVars();
     varLevel--;
     
+}
+
+void handleReturn() {
+
+    lexeme peek = lexList[lexIndex+1];
+
+    // This will be a text expression
+    if (peek.sym == rawtextsym) {
+        strcpy(returnText, "");
+        textExpression(returnText);
+        return;
+    }
+
+    // Check the identifier
+    if (peek.sym == identsym) {
+
+        int tableIndex = findVar(peek.name);
+        variable curVar = varTable[tableIndex];
+
+        // This will be a text expression
+        if (curVar.type == texttype) {
+            strcpy(returnText, "");
+            textExpression(returnText);
+            return;
+        }
+    }
+
+    returnNum = numExpression();
 }
 
 double numExpression() {

@@ -4,8 +4,8 @@ variable* varTable;
 int varTableIndex;
 int varLevel;
 
-double returnNumVal;
-char* returnText;
+double returnNum;
+char returnText[MAX_RAWTEXT_LENGTH];
 
 lexeme* lexList;
 int lexIndex;
@@ -23,6 +23,7 @@ void handleFuncDeclaration();
 void handleVarAssignment();
 void handleFuncCall();
 void handleLoop();
+void handleReturn();
 double numExpression();
 void textExpression();
 lexeme nextLex();
