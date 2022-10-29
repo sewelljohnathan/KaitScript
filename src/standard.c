@@ -2,16 +2,16 @@
 #include <string.h>
 #include <stdio.h>
 
-void handlePrint();
+void stdPrint();
 
 int checkStandards(char* name) {
 
     if (strcmp(name, "print") == 0) {
-        handlePrint(1); // Temporary decision to only have println. May revert later
+        stdPrint(1); // Temporary decision to only have println. May revert later
         return 1;
     }
     if (strcmp(name, "println") == 0) {
-        handlePrint(1);
+        stdPrint(1);
         return 1;
     }
 
@@ -26,7 +26,7 @@ void setStandards() {
     addFuncVar("println", funcParams, 0, 0);
 }
 
-void handlePrint(int lineFlag) {
+void stdPrint(int lineFlag) {
 
     // Opening Paren
     lexeme lparen = nextLex();
