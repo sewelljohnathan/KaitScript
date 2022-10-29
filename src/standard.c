@@ -4,16 +4,15 @@
 #include <stdlib.h>
 
 void handlePrint();
-void handlePrintln();
 
 int checkStandards(char* name) {
 
     if (strcmp(name, "print") == 0) {
-        handlePrint();
+        handlePrint(0);
         return 1;
     }
     if (strcmp(name, "println") == 0) {
-        handlePrintln();
+        handlePrint(1);
         return 1;
     }
 
@@ -28,7 +27,7 @@ void setStandards() {
     addFuncVar("println", funcParams, 0, 0);
 }
 
-void handlePrint() {
+void handlePrint(int lineFlag) {
 
     // Opening Paren
     lexeme lparen = nextLex();
@@ -44,31 +43,17 @@ void handlePrint() {
     if (rparen.sym != rparensym) { raiseError(lparen, "No closing \")\""); }
 
     if (argType == numtype) {
-        printf("%lf", argNum);
+        if (lineFlag) {
+            printf("%lf\n", argNum);
+        } else {
+            printf("%lf", argNum);
+        }
     }
     if (argType == texttype) {
-        printf("%s", argText);
-    }
-}
-void handlePrintln() {
-
-    // Opening Paren
-    lexeme lparen = nextLex();
-    if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
-
-    double argNum;
-    char argText[MAX_RAWTEXT_LENGTH];
-    varType argType;
-    unknownExpression(&argNum, argText, &argType);
-
-    // Closing Paren
-    lexeme rparen = nextLex();
-    if (rparen.sym != rparensym) { raiseError(lparen, "No closing \")\""); }
-
-    if (argType == numtype) {
-        printf("%lf\n", argNum);
-    }
-    if (argType == texttype) {
-        printf("%s\n", argText);
+        if (lineFlag) {
+            printf("%s\n", argText);
+        } else {
+            printf("%s", argText);
+        }
     }
 }
