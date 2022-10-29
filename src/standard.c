@@ -5,6 +5,7 @@
 
 void stdPrint();
 void stdStr();
+void stdInt();
 int removeTrailingZeroes(double num, char* stream);
 
 int checkStandards(char* name) {
@@ -21,6 +22,10 @@ int checkStandards(char* name) {
         stdStr();
         return 1;
     }
+    if (strcmp(name, "int") == 0) {
+        stdInt();
+        return 1;
+    }
 
     return 0;
 
@@ -32,6 +37,7 @@ void setStandards() {
     addFuncVar("print", funcParams, 0, 0);
     addFuncVar("println", funcParams, 0, 0);
     addFuncVar("str", funcParams, 0, 0);
+    addFuncVar("int", funcParams, 0, 0);
 }
 
 void stdPrint(int lineFlag) {
@@ -71,7 +77,24 @@ void stdStr() {
 
     double arg = numExpression();
     removeTrailingZeroes(arg, returnText);
+    returnType = texttype;
 
+    // Closing Paren
+    lexeme rparen = nextLex();
+    if (rparen.sym != rparensym) { raiseError(lparen, "No closing \")\""); }
+}
+
+void stdInt() {
+
+    // Opening Paren
+    lexeme lparen = nextLex();
+    if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
+
+    char arg[MAX_RAWTEXT_LENGTH];
+    textExpression(arg);
+    sscanf(arg, "%lf", &returnNum);
+    returnType = numtype;
+    
     // Closing Paren
     lexeme rparen = nextLex();
     if (rparen.sym != rparensym) { raiseError(lparen, "No closing \")\""); }
