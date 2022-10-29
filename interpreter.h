@@ -6,6 +6,7 @@ int varLevel;
 
 double returnNum;
 char returnText[MAX_RAWTEXT_LENGTH];
+varType returnType;
 
 lexeme* lexList;
 int lexIndex;
@@ -31,3 +32,7 @@ int isOperator(lexeme lex);
 int operatorPrecedence(lexeme lex);
 int isNegator(int index, int pastFirst);
 void raiseError(lexeme lex, char* msg);
+
+void unknownExpression(double* num, char* text, varType* expressionType);
+void setStandards();
+int checkStandards(char* name);

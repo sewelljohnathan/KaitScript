@@ -114,3 +114,35 @@ int isNegator(int index, int pastFirst) {
     }
     return 0;
 }
+
+void unknownExpression(double* num, char* text, varType* expressionType) {
+
+    lexeme peek = lexList[lexIndex+1];
+
+    // This will be a text expression
+    if (peek.sym == rawtextsym) {
+        strcpy(text, "");
+        textExpression(text);
+        *expressionType = texttype;
+        return;
+    }
+
+    // Check the identifier
+    if (peek.sym == identsym) {
+
+        int tableIndex = findVar(peek.name);
+        variable curVar = varTable[tableIndex];
+
+        // This will be a text expression
+        if (curVar.type == texttype) {
+            strcpy(text, "");
+            textExpression(text);
+            *expressionType = texttype;
+            return;
+        }
+    }
+
+    // Will be num (or error)
+    *num = numExpression();
+    *expressionType = numtype;
+}

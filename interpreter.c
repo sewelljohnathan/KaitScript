@@ -13,6 +13,7 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
     varTable = malloc(sizeof(variable) * MAX_VARIABLE_COUNT);
     varTableIndex = -1;
     varLevel = 0;
+    setStandards();
     
     lexList = input;
     lexIndex = -1;
@@ -30,7 +31,7 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
 
 void line() {
     
-    lexeme firstLex = nextLex();printf("%d | %d | %s\n", firstLex.sym, firstLex.row, firstLex.name);
+    lexeme firstLex = nextLex();//printf("%d | %d | %s\n", firstLex.sym, firstLex.row, firstLex.name);
 
     if (firstLex.sym == numsym) {  
         handleNumDeclaration();
@@ -197,6 +198,10 @@ void handleVarAssignment() {
 
 void handleFuncCall(lexeme identifier) {
 
+    if (checkStandards(identifier.name)) {
+        return;
+    }
+
     // Get the table entry
     int tableIndex = findVar(identifier.name);
     variable funcVar = varTable[tableIndex];
@@ -310,30 +315,7 @@ void handleLoop() {
 
 void handleReturn() {
 
-    lexeme peek = lexList[lexIndex+1];
-
-    // This will be a text expression
-    if (peek.sym == rawtextsym) {
-        strcpy(returnText, "");
-        textExpression(returnText);
-        return;
-    }
-
-    // Check the identifier
-    if (peek.sym == identsym) {
-
-        int tableIndex = findVar(peek.name);
-        variable curVar = varTable[tableIndex];
-
-        // This will be a text expression
-        if (curVar.type == texttype) {
-            strcpy(returnText, "");
-            textExpression(returnText);
-            return;
-        }
-    }
-
-    returnNum = numExpression();
+    unknownExpression(&returnNum, returnText, &returnType);
 }
 
 double numExpression() {
@@ -349,12 +331,14 @@ double numExpression() {
     int addSubAfterParen = 0;
     int negateNum = 0;
     int pastFirst = 0;
+    int seenLparen = 0;
 
     curLex = nextLex();
     while (1) {
         
         // '('
         if (curLex.sym == lparensym) {
+            seenLparen++;
             
             // Grammer Check
             // Previous must be an operator or the first lex
@@ -366,6 +350,11 @@ double numExpression() {
 
         // ')'
         } else if (curLex.sym == rparensym) {
+
+            if (seenLparen == 0) {
+                break;
+            }
+            seenLparen--;
 
             // Grammer Check
             // Previous cannot be an operator
