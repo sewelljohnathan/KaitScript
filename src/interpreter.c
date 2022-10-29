@@ -213,15 +213,16 @@ void handleFuncCall(lexeme identifier) {
     // Loop through all the arguments
     varLevel++;
     for (int i = 0; i < funcVar.funcParamsLength; i++) {
-        
-        lexeme arg = nextLex();
 
         // Copy the arg values into new variables with the param names
         if (funcVar.funcParams[i].type == numtype) {
-            addNumVar(funcVar.funcParams[i].name, arg.numval);
+            double argVal = numExpression();
+            addNumVar(funcVar.funcParams[i].name, argVal);
 
         } else if (funcVar.funcParams[i].type == texttype) {
-            addTextVar(funcVar.funcParams[i].name, arg.textval);
+            char argVal[MAX_RAWTEXT_LENGTH];
+            textExpression(argVal);
+            addTextVar(funcVar.funcParams[i].name, argVal);
         
         }
 

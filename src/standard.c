@@ -7,7 +7,7 @@ void handlePrint();
 int checkStandards(char* name) {
 
     if (strcmp(name, "print") == 0) {
-        handlePrint(0);
+        handlePrint(1); // Temporary decision to only have println. May revert later
         return 1;
     }
     if (strcmp(name, "println") == 0) {
