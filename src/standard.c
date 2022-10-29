@@ -3,101 +3,99 @@
 #include <stdio.h>
 #include <math.h>
 
-void stdPrint();
+void stdPrintNum();
+void stdPrintText();
 void stdStr();
 void stdInt();
 int removeTrailingZeroes(double num, char* stream);
 
 int checkStandards(char* name) {
 
-    if (strcmp(name, "print") == 0) {
-        stdPrint(1); // Temporary decision to only have println. May revert later
-        return 1;
+    int inStandards = 0;
+
+    // Opening Paren
+    lexeme lparen = nextLex();
+    if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
+
+    if (strcmp(name, "printn") == 0) {
+        stdPrintNum();
+        inStandards = 1;
     }
-    if (strcmp(name, "println") == 0) {
-        stdPrint(1);
-        return 1;
+    if (strcmp(name, "printt") == 0) {
+        stdPrintText();
+        inStandards = 1;
     }
     if (strcmp(name, "str") == 0) {
         stdStr();
-        return 1;
+        inStandards = 1;
     }
     if (strcmp(name, "int") == 0) {
         stdInt();
-        return 1;
+        inStandards = 1;
     }
 
-    return 0;
+    if (inStandards) {
+        // Closing Paren
+        lexeme rparen = nextLex();
+        if (rparen.sym != rparensym) { raiseError(rparen, "No closing \")\""); }
+    
+    } else {
+        lexIndex--;
+    }
+
+    return inStandards;
 
 }
 
 void setStandards() {
 
     funcParam funcParams[1];
-    addFuncVar("print", funcParams, 0, 0);
-    addFuncVar("println", funcParams, 0, 0);
+    addFuncVar("printn", funcParams, 0, 0);
+    addFuncVar("printt", funcParams, 0, 0);
     addFuncVar("str", funcParams, 0, 0);
     addFuncVar("int", funcParams, 0, 0);
 }
 
-void stdPrint(int lineFlag) {
+void stdPrintNum() {
 
-    // Opening Paren
-    lexeme lparen = nextLex();
-    if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
-
-    double argNum;
+    double arg = numExpression();
     char argText[MAX_RAWTEXT_LENGTH];
-    varType argType;
-    unknownExpression(&argNum, argText, &argType);
-
-    // Closing Paren
-    lexeme rparen = nextLex();
-    if (rparen.sym != rparensym) { raiseError(lparen, "No closing \")\""); }
 
     // Remove trailing
-    if (argType == numtype) {
-        removeTrailingZeroes(argNum, argText);
-    }
+    removeTrailingZeroes(arg, argText);
 
-    // Print
-    if (lineFlag) {
-        printf("%s\n", argText);
-    } else {
-        printf("%s", argText);
-    }
+    printf("%s\n", argText);
+
+}
+
+void stdPrintText() {
+
+    char argText[MAX_RAWTEXT_LENGTH];
+    strcpy(argText, "");
+    textExpression(argText);
+    printf("%s\n", argText);
 
 }
 
 void stdStr() {
 
-    // Opening Paren
-    lexeme lparen = nextLex();
-    if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
-
     double arg = numExpression();
     removeTrailingZeroes(arg, returnText);
     returnType = texttype;
 
-    // Closing Paren
-    lexeme rparen = nextLex();
-    if (rparen.sym != rparensym) { raiseError(lparen, "No closing \")\""); }
 }
 
 void stdInt() {
-
-    // Opening Paren
-    lexeme lparen = nextLex();
-    if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
 
     char arg[MAX_RAWTEXT_LENGTH];
     textExpression(arg);
     sscanf(arg, "%lf", &returnNum);
     returnType = numtype;
-    
-    // Closing Paren
-    lexeme rparen = nextLex();
-    if (rparen.sym != rparensym) { raiseError(lparen, "No closing \")\""); }
+
+}
+
+void stdRound() {
+
 }
 
 int removeTrailingZeroes(double num, char* stream) {
