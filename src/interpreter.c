@@ -49,7 +49,7 @@ void line() {
         handleLoop();
     }
     else if (firstLex.sym == returnsym) {
-        handleReturn();
+        unknownExpression(&returnNum, returnText, &returnType);
     }
     else if (firstLex.sym == -1) {
         return;
@@ -311,11 +311,6 @@ void handleLoop() {
     markVars();
     varLevel--;
     
-}
-
-void handleReturn() {
-
-    unknownExpression(&returnNum, returnText, &returnType);
 }
 
 double numExpression() {

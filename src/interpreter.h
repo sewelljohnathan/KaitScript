@@ -24,7 +24,6 @@ void handleFuncDeclaration();
 void handleVarAssignment();
 void handleFuncCall(lexeme identifier);
 void handleLoop();
-void handleReturn();
 double numExpression();
 void textExpression();
 lexeme nextLex();
