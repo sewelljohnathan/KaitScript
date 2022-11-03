@@ -49,7 +49,12 @@ void line() {
         handleLoop();
     }
     else if (firstLex.sym == returnsym) {
-        unknownExpression(&returnNum, returnText, &returnType);
+
+        if (returnType == numtype) {
+            returnNum = numExpression();
+        } else if (returnType == texttype) {
+            textExpression(returnText);
+        }
     }
     else if (firstLex.sym == -1) {
         return;
@@ -144,12 +149,28 @@ void handleFuncDeclaration() {
         }
     }
 
-    // Add the function to the table
-    addFuncVar(identifier.name, funcParams, funcParamLength, lexIndex+2);
-
-    // Pass through all of the rest of the function
-    int nestedLevel = 0;
+    // Get the func type
     lexeme next = nextLex();
+    varType funcType;
+    if (next.sym == numsym) {
+        funcType = numtype;
+    } else if (next.sym == textsym) {
+        funcType = texttype;
+    }
+
+    // This is in case there is no type listed (i.e. a nonetype)
+    if (next.sym != lbracesym) {
+        // Opening Brace
+        lexeme lbrace = nextLex();
+        if (lbrace.sym != lbracesym) { raiseError(lbrace, "No opening \"{\""); }
+    }
+
+    // Add the function to the table
+    addFuncVar(identifier.name, funcParams, funcParamLength, lexIndex+1, funcType);
+    
+    // Pass through all of the rest of the function
+    int nestedLevel = 1;
+    next = nextLex();
     while (1) {
 
         if (next.sym == lbracesym) {
@@ -198,13 +219,14 @@ void handleVarAssignment() {
 
 void handleFuncCall(lexeme identifier) {
 
-    if (checkStandards(identifier.name)) {
-        return;
-    }
-
     // Get the table entry
     int tableIndex = findVar(identifier.name);
     variable funcVar = varTable[tableIndex];
+    returnType = funcVar.type;
+
+    if (checkStandards(identifier.name)) {
+        return;
+    }
 
     // Opening Paren
     lexeme lparen = nextLex();
@@ -220,7 +242,7 @@ void handleFuncCall(lexeme identifier) {
             addNumVar(funcVar.funcParams[i].name, argVal);
 
         } else if (funcVar.funcParams[i].type == texttype) {
-            char argVal[MAX_RAWTEXT_LENGTH];
+            char argVal[MAX_RAWTEXT_LENGTH] = "";
             textExpression(argVal);
             addTextVar(funcVar.funcParams[i].name, argVal);
         
@@ -545,6 +567,7 @@ double numExpression() {
 void textExpression(char* text) {
 
     int seenFirstSym = 0;
+    char bufferText[MAX_RAWTEXT_LENGTH] = "";
 
     lexeme curLex = nextLex();
     while (1) {
@@ -561,11 +584,19 @@ void textExpression(char* text) {
             if (seenFirstSym == 1 && lexList[lexIndex-1].sym != plussym) {
                 break;
             }
-            strcat(text, curLex.textval);
+            strcat(bufferText, curLex.textval);
+            seenFirstSym = 1;
+
+        } else if (curLex.sym == rawnumsym) {
+            if (seenFirstSym == 1 && lexList[lexIndex-1].sym != plussym) {
+                break;
+            }
+            convertNumToText(curLex.numval, curLex.textval);
+            strcat(bufferText, curLex.textval);
             seenFirstSym = 1;
 
         } else if (curLex.sym == identsym) {
-            if (seenFirstSym == 1 && lexList[lexIndex-1].sym != plussym) {
+            if (seenFirstSym && lexList[lexIndex-1].sym != plussym) {
                 break;
             }
             int tableIndex = findVar(curLex.name);
@@ -573,9 +604,13 @@ void textExpression(char* text) {
 
             if (curVar.isFunc) {
                 handleFuncCall(curLex);
-                strcat(text, returnText);
+                strcat(bufferText, returnText);
             } else {
-                strcat(text, curVar.textVal);
+                // If the var is a number, hacky convert it
+                if (curVar.type == numtype) {
+                    convertNumToText(curVar.numVal, curVar.textVal);
+                }
+                strcat(bufferText, curVar.textVal);
             }
 
             seenFirstSym = 1;
@@ -587,6 +622,7 @@ void textExpression(char* text) {
         curLex = nextLex();
 
     }
+    strcpy(text, bufferText);
     lexIndex--;
 
 }
