@@ -21,7 +21,12 @@ lexeme* generateLexList(char* input) {
     // Loop through every character
     while (curChar != '\0') {
 
-        lexeme curLex = (const struct lexeme) { 0 };
+        /* 
+        * I used to have the commented line and don't know why I thought I needed it,
+        * so I'm keeping it for future reference just in case shit starts breaking.
+        */
+        //lexeme curLex = (const struct lexeme) { 0 }
+        lexeme curLex;
 
         if (curChar == '\n') {
             row++;
