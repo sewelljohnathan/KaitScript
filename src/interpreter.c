@@ -69,11 +69,11 @@ void handleNumDeclaration() {
 
     // Variable name
     lexeme identifier = nextLex();
-    if (identifier.sym != identsym) { return; }
+    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); }
 
     // Assignment '='
     lexeme eqlsign = nextLex();
-    if (eqlsign.sym != assignsym) { return; }
+    if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); }
 
     // Create the new variable
     double value = numExpression();
@@ -85,11 +85,11 @@ void handleTextDeclaration() {
 
     // Variable name
     lexeme identifier = nextLex();
-    if (identifier.sym != identsym) { return; }
+    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); }
 
     // Assignment '='
     lexeme eqlsign = nextLex();
-    if (eqlsign.sym != assignsym) { return; }
+    if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); }
 
     // Create the new variable
     char text[MAX_RAWTEXT_LENGTH] = "";
@@ -102,11 +102,11 @@ void handleFuncDeclaration() {
 
     // Function name
     lexeme identifier = nextLex();
-    if (identifier.sym != identsym) { raiseError(identifier, "Not an identifier"); }
+    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); }
 
     // Opening Paren
     lexeme lparen = nextLex();
-    if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
+    if (lparen.sym != lparensym) { raiseError(lparen, "Expected \"(\"."); }
 
     // Initialize some values
     funcParam funcParams[MAX_FUNC_PARAMS];
@@ -120,7 +120,7 @@ void handleFuncDeclaration() {
         
         // Param name
         lexeme paramIdentifier = nextLex();
-        if (paramIdentifier.sym != identsym) { raiseError(paramIdentifier, "Not an identifier"); }       
+        if (paramIdentifier.sym != identsym) { raiseError(paramIdentifier, "Expected identifier."); }       
 
         // Add the param to the list
         funcParam* curParam = &funcParams[funcParamLength++];
@@ -142,7 +142,7 @@ void handleFuncDeclaration() {
             paramType = nextLex();
 
         } else if (paramEnd.sym != rparensym) {
-            raiseError(paramEnd, "No closing \")\"");
+            raiseError(paramEnd, "Expected \")\".");
 
         } else {
             break;
@@ -162,7 +162,7 @@ void handleFuncDeclaration() {
     if (next.sym != lbracesym) {
         // Opening Brace
         lexeme lbrace = nextLex();
-        if (lbrace.sym != lbracesym) { raiseError(lbrace, "No opening \"{\""); }
+        if (lbrace.sym != lbracesym) { raiseError(lbrace, "Expected \"{\"."); }
     }
 
     // Add the function to the table
@@ -201,7 +201,7 @@ void handleVarAssignment() {
 
         // Assignment '='
         lexeme eqlsign = nextLex();
-        if (eqlsign.sym != assignsym) { return; }
+        if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); }
 
         if (curVar.type == numtype) {
             double value = numExpression();
@@ -230,7 +230,7 @@ void handleFuncCall(lexeme identifier) {
 
     // Opening Paren
     lexeme lparen = nextLex();
-    if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
+    if (lparen.sym != lparensym) { raiseError(lparen, "Expected \"(\"."); }
 
     // Loop through all the arguments
     varLevel++;
@@ -261,7 +261,7 @@ void handleFuncCall(lexeme identifier) {
     // Make sure you get the closing ) if no args
     if (funcVar.funcParamsLength == 0) {
         lexeme rparen = nextLex();
-        if (rparen.sym != rparensym) { raiseError(rparen, "No closing \")\""); }
+        if (rparen.sym != rparensym) { raiseError(rparen, "Expected \")\"."); }
     }
 
     int oldIndex = lexIndex;
@@ -273,7 +273,7 @@ void handleFuncCall(lexeme identifier) {
 
     // }
     lexeme rbrace = nextLex();
-    if (rbrace.sym != rbracesym) { raiseError(rbrace, "No closing \"}\""); }
+    if (rbrace.sym != rbracesym) { raiseError(rbrace, "Expected \"}\"."); }
 
     markVars();
     varLevel--;
@@ -291,7 +291,7 @@ void handleLoop() {
 
     // counter variable
     lexeme identifier = nextLex();
-    if (identifier.sym != identsym) { return; }
+    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); }
 
     addNumVar(identifier.name, 0);
     int tableIndex = varTableIndex;
@@ -310,7 +310,7 @@ void handleLoop() {
    
     // {
     lexeme lbrace = nextLex();
-    if (lbrace.sym != lbracesym) { return; }
+    if (lbrace.sym != lbracesym) { raiseError(lbrace, "Expected \"{\".");}
 
     // Do the loop
     int startLexIndex = lexIndex;
@@ -329,7 +329,7 @@ void handleLoop() {
     
     // }
     lexeme rbrace = nextLex();
-    if (rbrace.sym != rbracesym) { return; }
+    if (rbrace.sym != rbracesym) { raiseError(rbrace, "Expected \"}\"."); }
 
     markVars();
     varLevel--;
