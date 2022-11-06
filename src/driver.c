@@ -5,7 +5,6 @@
 #include "datatypes.h"
 
 #define VERSION "0.3.0"
-
 #define MAX_FILE_LENGTH 10000
 
 const char* symNameList[] = {
