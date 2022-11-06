@@ -29,8 +29,25 @@ lexeme* generateLexList(char* input) {
 
         curLex.row = row;
 
+        // Comment
+        if (curChar == '#') {
+
+            while (1) {
+
+                curChar = input[++inputIndex];
+                if (curChar == '\n') {
+                    row++;
+                    break;
+                }
+            }
+
+            curChar = input[++inputIndex];
+            continue;
+
+        }
+
         // Whitespace
-        if (iscntrl(curChar) || isspace(curChar)) {
+        else if (iscntrl(curChar) || isspace(curChar)) {
             curChar = input[++inputIndex];
             continue;
         }
@@ -120,15 +137,6 @@ lexeme* generateLexList(char* input) {
                 
 
             }
-        }
-
-        // Comment
-        else if (curChar == '#') {
-
-            while (curChar != '\n') {
-                curChar = input[++inputIndex];
-            }
-
         }
 
         // Other
