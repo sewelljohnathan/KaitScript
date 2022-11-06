@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 void stdPrint();
+void stdInput();
 void stdStr();
 void stdInt();
 void stdRound();
@@ -17,6 +18,10 @@ int checkStandards(char* name) {
 
     if (strcmp(name, "print") == 0) {
         stdPrint();
+        inStandards = 1;
+    }
+    if (strcmp(name, "input") == 0) {
+        stdInput();
         inStandards = 1;
     }
     if (strcmp(name, "str") == 0) {
@@ -46,6 +51,7 @@ void setStandards() {
 
     funcParam funcParams[1];
     addFuncVar("print", funcParams, 0, 0, texttype);
+    addFuncVar("input", funcParams, 0, 0, texttype);
     addFuncVar("str", funcParams, 0, 0, texttype);
     addFuncVar("int", funcParams, 0, 0, numtype);
 }
@@ -56,6 +62,20 @@ void stdPrint() {
     char argText[MAX_RAWTEXT_LENGTH] = "";
     textExpression(argText);
     printf("%s\n", argText);
+
+}
+
+void stdInput() {
+
+    double argNum;
+    char argText[MAX_RAWTEXT_LENGTH] = "";
+    textExpression(argText);
+    printf("%s", argText);
+
+    char responseText[MAX_RAWTEXT_LENGTH] = "";
+    fgets(responseText, sizeof(responseText), stdin);
+
+    strcpy(returnText, responseText);
 
 }
 
