@@ -2,7 +2,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include "datatypes.h"
-#include <stdio.h>
 
 sym_type checkReservedSyms(char* name);
 sym_type checkOtherSyms(int* inputIndex, char* input);
