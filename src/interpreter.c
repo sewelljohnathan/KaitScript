@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 void raiseError(lexeme lex, char* msg) {
     printf("%s\nFound \"%d\" on row %d\n", msg, lex.sym, lex.row);
@@ -547,11 +548,12 @@ double numExpression() {
                 case subsym: newValue = prevValue2 - prevValue1; break;
                 case multsym: newValue = prevValue2 * prevValue1; break;
                 case divsym: newValue = prevValue2 / prevValue1; break;
-                case expsym: 
-                    newValue = prevValue2;
-                    for (int i = 1; i < prevValue1; i++) {
-                        newValue *= prevValue2;
+                case expsym:
+                    if (prevValue2 < 0 && floor(prevValue1) != ceil(prevValue1)) {
+                        printf("Cannot take fractional exponents of negative numbers.\nFound at row %d.\n", nextOutput.row);
+                        exit(1);
                     }
+                    newValue = pow(prevValue2, prevValue1);
                 break;
             }
             valueStack[--valueStackIndex] = newValue;
