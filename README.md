@@ -19,15 +19,19 @@ The syntax for Kait is modeled off languages like Python, but with typing and br
 
 There are two variable types: `num` and `text` (aka string)
 Declare a variable:
-`num pi = 3.1415`
-`text myString = "Hello World!"`
+```
+num pi = 3.1415
+text myString = "Hello World!"
+```
 
 ### Arrays
 
 Only 1-dimensinal arrays are allowed
 Declare an array:
-`num numbers[] = [1, 2, 3, 4]`
-`text names[] = ["bob", "alice"]`
+```
+num numbers[] = [1, 2, 3, 4]
+text names[] = ["bob", "alice"]
+```
 
 ### Loops
 
