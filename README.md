@@ -37,7 +37,7 @@ loop i from 1 to 5 {
     a = a + i
 }
 ```
-The variable `i` does not need to be defined beforehand, and is implicitly of type `num`
+The variable `i` can have any name and does not need to be defined beforehand. It is implicitly of type `num`
 
 ### Functions
 
