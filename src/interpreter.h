@@ -24,10 +24,10 @@ int numExpression(double* num);
 int textExpression(char* text);
 
 // interpreter tools
+lexeme nextLex();
 int findVar(char* name);
 void markVars();
 void printVarTable();
-lexeme nextLex();
 void addNumVar(char* name, double value);
 void addTextVar(char* name, char* text);
 void addFuncVar(char* name, funcParam* funcParams, int funcParamLength, int funcStart, varType funcType);

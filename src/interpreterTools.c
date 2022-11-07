@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <math.h>
 
+lexeme nextLex() {
+    return lexList[++lexIndex];
+}
+
 int findVar(char* name) {
 
     for (int i = varTableIndex; i >= 0; i--) {
@@ -46,10 +50,6 @@ void printVarTable() {
         );
     }
 
-}
-
-lexeme nextLex() {
-    return lexList[++lexIndex];
 }
 
 void addNumVar(char* name, double value) {
@@ -97,6 +97,7 @@ int isOperator(lexeme lex) {
         default: return 0; break;
     }
 }
+
 int operatorPrecedence(lexeme lex) {
     switch (lex.sym) {
         case plussym: return 1; break;
@@ -108,6 +109,7 @@ int operatorPrecedence(lexeme lex) {
         default: return -1; break;
     }
 }
+
 int isNegator(int index, int pastFirst) {
     lexeme curLex = lexList[index];
     lexeme prevLex = lexList[index-1];
