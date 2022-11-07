@@ -81,7 +81,8 @@ void stdInput() {
 
 void stdStr() {
 
-    double arg = numExpression();
+    double arg;
+    numExpression(&arg);
     convertNumToText(arg, returnText);
     returnType = texttype;
 

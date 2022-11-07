@@ -52,7 +52,7 @@ void line() {
     else if (firstLex.sym == returnsym) {
 
         if (returnType == numtype) {
-            returnNum = numExpression();
+            numExpression(&returnNum);
         } else if (returnType == texttype) {
             textExpression(returnText);
         }
@@ -77,7 +77,8 @@ void handleNumDeclaration() {
     if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); }
 
     // Create the new variable
-    double value = numExpression();
+    double value;
+    numExpression(&value);
     addNumVar(identifier.name, value);
 
 }
@@ -205,7 +206,8 @@ void handleVarAssignment() {
         if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); }
 
         if (curVar.type == numtype) {
-            double value = numExpression();
+            double value;
+            numExpression(&value);
             varTable[tableIndex].numVal = value;
         } else if (curVar.type == texttype) {
             char text[MAX_RAWTEXT_LENGTH] = "";
@@ -239,7 +241,8 @@ void handleFuncCall(lexeme identifier) {
 
         // Copy the arg values into new variables with the param names
         if (funcVar.funcParams[i].type == numtype) {
-            double argVal = numExpression();
+            double argVal;
+            numExpression(&argVal);
             addNumVar(funcVar.funcParams[i].name, argVal);
 
         } else if (funcVar.funcParams[i].type == texttype) {
@@ -301,13 +304,25 @@ void handleLoop() {
     lexeme from = nextLex();
 
     // Get the start number
-    start = numExpression();
+    double startInput;
+    numExpression(&startInput);
+    if (floor(startInput) != ceil(startInput)) {
+        printf("Expected an integer."); exit(1);
+    } else {
+        start = (int) (startInput);
+    }
 
     // To keyword
     lexeme to = nextLex();
 
     // Get the end number
-    end = numExpression();
+    double endInput;
+    numExpression(&endInput);
+    if (floor(endInput) != ceil(endInput)) {
+        printf("Expected an integer"); exit(1);
+    } else {
+        end = (int) (endInput);
+    }
    
     // {
     lexeme lbrace = nextLex();
@@ -337,7 +352,7 @@ void handleLoop() {
     
 }
 
-double numExpression() {
+void numExpression(double* num) {
 
     lexeme curLex;
 
@@ -562,7 +577,7 @@ double numExpression() {
 
     }
 
-    return valueStack[0];
+    *num = valueStack[0];
 
 }
 
