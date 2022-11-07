@@ -13,15 +13,15 @@ int lexIndex;
 
 // interpreter main
 void raiseError(lexeme lex, char* msg);
-void line();
-void handleNumDeclaration();
-void handleTextDeclaration();
-void handleFuncDeclaration();
-void handleVarAssignment();
-void handleFuncCall(lexeme identifier);
-void handleLoop();
-void numExpression(double* num);
-void textExpression(char* text);
+int line();
+int handleNumDeclaration();
+int handleTextDeclaration();
+int handleFuncDeclaration();
+int handleVarAssignment();
+int handleFuncCall(lexeme identifier);
+int handleLoop();
+int numExpression(double* num);
+int textExpression(char* text);
 
 // interpreter tools
 int findVar(char* name);
@@ -34,7 +34,7 @@ void addFuncVar(char* name, funcParam* funcParams, int funcParamLength, int func
 int isOperator(lexeme lex);
 int operatorPrecedence(lexeme lex);
 int isNegator(int index, int pastFirst);
-int convertNumToText(double num, char* stream);
+void convertNumToText(double num, char* stream);
 
 // standards
 void setStandards();

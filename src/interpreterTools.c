@@ -117,7 +117,7 @@ int isNegator(int index, int pastFirst) {
     return 0;
 }
 
-int convertNumToText(double num, char* stream) {
+void convertNumToText(double num, char* stream) {
 
     strcpy(stream, "");
 

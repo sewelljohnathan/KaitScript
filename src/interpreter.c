@@ -6,7 +6,6 @@
 
 void raiseError(lexeme lex, char* msg) {
     printf("%s\nFound \"%d\" on row %d\n", msg, lex.sym, lex.row);
-    exit(1);
 }
 
 int interpretLexList(lexeme* input, int printVarTableFlag) {
@@ -20,7 +19,7 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
     lexIndex = -1;
 
     while (lexList[lexIndex].sym != -1) {
-        line();
+        if (line()) { return 1; }
     }
 
     if (printVarTableFlag) {
@@ -30,85 +29,87 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
     return 0;
 }
 
-void line() {
+int line() {
     
     lexeme firstLex = nextLex();//printf("%d | %d | %s\n", firstLex.sym, firstLex.row, firstLex.name);
 
     if (firstLex.sym == numsym) {  
-        handleNumDeclaration();
+        if (handleNumDeclaration()) { return 1; }
     } 
     else if (firstLex.sym == textsym) {
-        handleTextDeclaration();
+        if (handleTextDeclaration()) { return 1; }
     }
     else if (firstLex.sym == functionsym) {
-        handleFuncDeclaration();
+        if (handleFuncDeclaration()) { return 1; }
     }
     else if (firstLex.sym == identsym) {
-        handleVarAssignment();
+        if (handleVarAssignment()) { return 1; }
     } 
     else if (firstLex.sym == loopsym) {
-        handleLoop();
+        if (handleLoop()) { return 1; }
     }
     else if (firstLex.sym == returnsym) {
 
         if (returnType == numtype) {
-            numExpression(&returnNum);
+            if (numExpression(&returnNum)) { return 1; }
         } else if (returnType == texttype) {
-            textExpression(returnText);
+            if (textExpression(returnText)) { return 1; }
         }
     }
     else if (firstLex.sym == -1) {
-        return;
+        return 0;
     } else {
-        raiseError(firstLex, "Unexpected token.");
+        printf("Unexpected %d on line %d", firstLex.sym, firstLex.row);
+        return 1;
     }
-
 
 }
 
-void handleNumDeclaration() {
+int handleNumDeclaration() {
 
     // Variable name
     lexeme identifier = nextLex();
-    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); }
+    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); return 1; }
 
     // Assignment '='
     lexeme eqlsign = nextLex();
-    if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); }
+    if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); return 1; }
 
     // Create the new variable
     double value;
-    numExpression(&value);
+    if (numExpression(&value)) { return 1; }
     addNumVar(identifier.name, value);
 
+    return 0;
 }
 
-void handleTextDeclaration() {
+int handleTextDeclaration() {
 
     // Variable name
     lexeme identifier = nextLex();
-    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); }
+    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); return 1; }
 
     // Assignment '='
     lexeme eqlsign = nextLex();
-    if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); }
+    if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); return 1; }
 
     // Create the new variable
     char text[MAX_RAWTEXT_LENGTH] = "";
-    textExpression(text);
+    if (textExpression(text)) { return 1; }
     addTextVar(identifier.name, text);
 
+    return 0;
 }
 
-void handleFuncDeclaration() {
+int handleFuncDeclaration() {
 
     // Function name
     lexeme identifier = nextLex();
-    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); }
+    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); return 1; }
 
     // Opening Paren
     lexeme lparen = nextLex();
-    if (lparen.sym != lparensym) { raiseError(lparen, "Expected \"(\"."); }
+    if (lparen.sym != lparensym) { raiseError(lparen, "Expected \"(\"."); return 1; }
 
     // Initialize some values
     funcParam funcParams[MAX_FUNC_PARAMS];
@@ -122,7 +123,7 @@ void handleFuncDeclaration() {
         
         // Param name
         lexeme paramIdentifier = nextLex();
-        if (paramIdentifier.sym != identsym) { raiseError(paramIdentifier, "Expected identifier."); }       
+        if (paramIdentifier.sym != identsym) { raiseError(paramIdentifier, "Expected identifier."); return 1; }       
 
         // Add the param to the list
         funcParam* curParam = &funcParams[funcParamLength++];
@@ -134,7 +135,7 @@ void handleFuncDeclaration() {
             curParam->type = texttype;
         } else {
             // Error
-            return;
+            return 1;
         }
         
         // Comma or ')'
@@ -145,6 +146,7 @@ void handleFuncDeclaration() {
 
         } else if (paramEnd.sym != rparensym) {
             raiseError(paramEnd, "Expected \")\".");
+            return 1;
 
         } else {
             break;
@@ -164,7 +166,7 @@ void handleFuncDeclaration() {
     if (next.sym != lbracesym) {
         // Opening Brace
         lexeme lbrace = nextLex();
-        if (lbrace.sym != lbracesym) { raiseError(lbrace, "Expected \"{\"."); }
+        if (lbrace.sym != lbracesym) { raiseError(lbrace, "Expected \"{\"."); return 1; }
     }
 
     // Add the function to the table
@@ -188,9 +190,10 @@ void handleFuncDeclaration() {
         next = nextLex();
     }
     
+    return 0;
 }
 
-void handleVarAssignment() {
+int handleVarAssignment() {
 
     // Variable name
     lexeme identifier = lexList[lexIndex];
@@ -203,37 +206,40 @@ void handleVarAssignment() {
 
         // Assignment '='
         lexeme eqlsign = nextLex();
-        if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); }
+        if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); return 1; }
 
         if (curVar.type == numtype) {
             double value;
-            numExpression(&value);
+            if (numExpression(&value)) { return 1; }
             varTable[tableIndex].numVal = value;
         } else if (curVar.type == texttype) {
             char text[MAX_RAWTEXT_LENGTH] = "";
-            textExpression(text);
+            if (textExpression(text)) { return 1; }
             strcpy(varTable[tableIndex].textVal, text);
         }
     } else {
-        handleFuncCall(identifier);
+        if (handleFuncCall(identifier)) { return 1; }
     }
 
+    return 0;
 }
 
-void handleFuncCall(lexeme identifier) {
+int handleFuncCall(lexeme identifier) {
 
     // Get the table entry
     int tableIndex = findVar(identifier.name);
     variable funcVar = varTable[tableIndex];
     returnType = funcVar.type;
 
-    if (checkStandards(identifier.name)) {
-        return;
+    switch (checkStandards(identifier.name)) {
+        case 1: return 1; break;
+        case -1: return 0; break;
+        // case 0: keep going, was not in standards
     }
 
     // Opening Paren
     lexeme lparen = nextLex();
-    if (lparen.sym != lparensym) { raiseError(lparen, "Expected \"(\"."); }
+    if (lparen.sym != lparensym) { raiseError(lparen, "Expected \"(\"."); return 1; }
 
     // Loop through all the arguments
     varLevel++;
@@ -242,12 +248,12 @@ void handleFuncCall(lexeme identifier) {
         // Copy the arg values into new variables with the param names
         if (funcVar.funcParams[i].type == numtype) {
             double argVal;
-            numExpression(&argVal);
+            if (numExpression(&argVal)) { return 1; }
             addNumVar(funcVar.funcParams[i].name, argVal);
 
         } else if (funcVar.funcParams[i].type == texttype) {
             char argVal[MAX_RAWTEXT_LENGTH] = "";
-            textExpression(argVal);
+            if (textExpression(argVal)) { return 1; }
             addTextVar(funcVar.funcParams[i].name, argVal);
         
         }
@@ -259,33 +265,35 @@ void handleFuncCall(lexeme identifier) {
             (i == funcVar.funcParamsLength-1 && commaOrRparen.sym == rparensym)
         )) {
             raiseError(commaOrRparen, "Should be a \",\" or \")\"");
+            return 1;
         }
     }
 
     // Make sure you get the closing ) if no args
     if (funcVar.funcParamsLength == 0) {
         lexeme rparen = nextLex();
-        if (rparen.sym != rparensym) { raiseError(rparen, "Expected \")\"."); }
+        if (rparen.sym != rparensym) { raiseError(rparen, "Expected \")\"."); return 1; }
     }
 
     int oldIndex = lexIndex;
     // Run the function
     lexIndex = funcVar.funcStart-1;
     while (lexList[lexIndex+1].sym != rbracesym) {
-        line();
+        if (line()) { return 1; };
     }
 
     // }
     lexeme rbrace = nextLex();
-    if (rbrace.sym != rbracesym) { raiseError(rbrace, "Expected \"}\"."); }
+    if (rbrace.sym != rbracesym) { raiseError(rbrace, "Expected \"}\"."); return 1; }
 
     markVars();
     varLevel--;
     lexIndex = oldIndex;
     
+    return 0;
 }
 
-void handleLoop() {
+int handleLoop() {
 
     varLevel++;
 
@@ -295,7 +303,7 @@ void handleLoop() {
 
     // counter variable
     lexeme identifier = nextLex();
-    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); }
+    if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); return 1; }
 
     addNumVar(identifier.name, 0);
     int tableIndex = varTableIndex;
@@ -305,9 +313,9 @@ void handleLoop() {
 
     // Get the start number
     double startInput;
-    numExpression(&startInput);
+    if (numExpression(&startInput)) { return 1; }
     if (floor(startInput) != ceil(startInput)) {
-        printf("Expected an integer."); exit(1);
+        printf("Expected an integer."); return 1;
     } else {
         start = (int) (startInput);
     }
@@ -317,16 +325,16 @@ void handleLoop() {
 
     // Get the end number
     double endInput;
-    numExpression(&endInput);
+    if (numExpression(&endInput)) { return 1; }
     if (floor(endInput) != ceil(endInput)) {
-        printf("Expected an integer"); exit(1);
+        printf("Expected an integer"); return 1;
     } else {
         end = (int) (endInput);
     }
    
     // {
     lexeme lbrace = nextLex();
-    if (lbrace.sym != lbracesym) { raiseError(lbrace, "Expected \"{\".");}
+    if (lbrace.sym != lbracesym) { raiseError(lbrace, "Expected \"{\"."); return 1; }
 
     // Do the loop
     int startLexIndex = lexIndex;
@@ -338,21 +346,22 @@ void handleLoop() {
         // Do the loop
         lexIndex = startLexIndex;
         while (lexList[lexIndex+1].sym != rbracesym) {
-            line();
+            if (line()) { return 1; }
         }
         
     }
     
     // }
     lexeme rbrace = nextLex();
-    if (rbrace.sym != rbracesym) { raiseError(rbrace, "Expected \"}\"."); }
+    if (rbrace.sym != rbracesym) { raiseError(rbrace, "Expected \"}\"."); return 1; }
 
     markVars();
     varLevel--;
     
+    return 0;
 }
 
-void numExpression(double* num) {
+int numExpression(double* num) {
 
     lexeme curLex;
 
@@ -378,6 +387,7 @@ void numExpression(double* num) {
             // Previous must be an operator or the first lex
             if (!isOperator(lexList[lexIndex-1]) && pastFirst == 0) {
                 raiseError(curLex, "Unexpected \"(\"");
+                return 1;
             }
 
             shuntingStack[++shuntingStackIndex] = curLex;
@@ -394,6 +404,7 @@ void numExpression(double* num) {
             // Previous cannot be an operator
             if (isOperator(lexList[lexIndex-1])) {
                 raiseError(curLex, "Unexpected \")\"");
+                return 1;
             }
 
             // Pop operators until '(' is found
@@ -425,6 +436,7 @@ void numExpression(double* num) {
                 (lexList[lexIndex-1].sym == lparensym || isOperator(lexList[lexIndex-1]))
              ) {
                 raiseError(curLex, "Unexpected operator.");
+                return 1;
             }
 
             // https://stackoverflow.com/questions/46861254/infix-to-postfix-for-negative-numbers
@@ -465,6 +477,7 @@ void numExpression(double* num) {
             // Previous cannot be a number
             if (lexList[lexIndex-1].sym == rawnumsym || lexList[lexIndex-1].sym == identsym) {
                 raiseError(curLex, "Unexpected number.");
+                return 1;
             }
 
             shuntingOutput[++shuntingOutputIndex] = curLex;
@@ -489,7 +502,7 @@ void numExpression(double* num) {
             variable curVar = varTable[tableIndex];
 
             if (curVar.isFunc) {
-                handleFuncCall(curLex);
+                if (handleFuncCall(curLex)) { return 1; }
 
                 // Hacky; force the return value into a new lex
                 lexeme insertLex;
@@ -516,6 +529,7 @@ void numExpression(double* num) {
     }
     if (isOperator(lexList[lexIndex-1])) {
         raiseError(lexList[lexIndex-1], "Expected a number.");
+        return 1;
     }
     lexIndex--;
 
@@ -566,7 +580,7 @@ void numExpression(double* num) {
                 case expsym:
                     if (prevValue2 < 0 && floor(prevValue1) != ceil(prevValue1)) {
                         printf("Cannot take fractional exponents of negative numbers.\nFound at row %d.\n", nextOutput.row);
-                        exit(1);
+                        return 1;
                     }
                     newValue = pow(prevValue2, prevValue1);
                 break;
@@ -579,9 +593,10 @@ void numExpression(double* num) {
 
     *num = valueStack[0];
 
+    return 0;
 }
 
-void textExpression(char* text) {
+int textExpression(char* text) {
 
     int seenFirstSym = 0;
     char bufferText[MAX_RAWTEXT_LENGTH] = "";
@@ -594,6 +609,7 @@ void textExpression(char* text) {
         if (curLex.sym == plussym) {
             if (seenFirstSym == 0) {
                 raiseError(curLex, "Expected a number.");
+                return 1;
             }
 
         } else if (curLex.sym == rawtextsym) {
@@ -620,7 +636,7 @@ void textExpression(char* text) {
             variable curVar = varTable[tableIndex];
 
             if (curVar.isFunc) {
-                handleFuncCall(curLex);
+                if (handleFuncCall(curLex)) { return 1; }
                 strcat(bufferText, returnText);
             } else {
                 // If the var is a number, hacky convert it
@@ -642,4 +658,5 @@ void textExpression(char* text) {
     strcpy(text, bufferText);
     lexIndex--;
 
+    return 0;
 }

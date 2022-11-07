@@ -2,11 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 
-void stdPrint();
-void stdInput();
-void stdStr();
-void stdInt();
-void stdRound();
+int stdPrint();
+int stdInput();
+int stdStr();
+int stdInt();
 
 int checkStandards(char* name) {
 
@@ -17,19 +16,19 @@ int checkStandards(char* name) {
     if (lparen.sym != lparensym) { raiseError(lparen, "No opening \"(\""); }
 
     if (strcmp(name, "print") == 0) {
-        stdPrint();
+        if (stdPrint()) { return 1; }
         inStandards = 1;
     }
     if (strcmp(name, "input") == 0) {
-        stdInput();
+        if (stdInput()) { return 1; }
         inStandards = 1;
     }
     if (strcmp(name, "str") == 0) {
-        stdStr();
+        if (stdStr()) { return 1; }
         inStandards = 1;
     }
     if (strcmp(name, "int") == 0) {
-        stdInt();
+        if (stdInt()) { return 1; }
         inStandards = 1;
     }
 
@@ -37,13 +36,17 @@ int checkStandards(char* name) {
     if (inStandards) {
         // Closing Paren
         lexeme rparen = nextLex();
-        if (rparen.sym != rparensym) { raiseError(rparen, "No closing \")\""); }
+        if (rparen.sym != rparensym) { raiseError(rparen, "No closing \")\""); return 1; }
     
     } else {
         lexIndex--;
     }
 
-    return inStandards;
+    if (inStandards) {
+        return -1;
+    } else {
+        return 0;
+    }
 
 }
 
@@ -56,20 +59,21 @@ void setStandards() {
     addFuncVar("int", funcParams, 0, 0, numtype);
 }
 
-void stdPrint() {
+int stdPrint() {
 
     double argNum;
     char argText[MAX_RAWTEXT_LENGTH] = "";
-    textExpression(argText);
+    if (textExpression(argText)) { return 1; }
     printf("%s\n", argText);
 
+    return 0;
 }
 
-void stdInput() {
+int stdInput() {
 
     double argNum;
     char argText[MAX_RAWTEXT_LENGTH] = "";
-    textExpression(argText);
+    if (textExpression(argText)) { return 1; }
     printf("%s", argText);
 
     char responseText[MAX_RAWTEXT_LENGTH] = "";
@@ -77,26 +81,25 @@ void stdInput() {
 
     strcpy(returnText, responseText);
 
+    return 0;
 }
 
-void stdStr() {
+int stdStr() {
 
     double arg;
-    numExpression(&arg);
+    if (numExpression(&arg)) { return 1; }
     convertNumToText(arg, returnText);
     returnType = texttype;
 
+    return 0;
 }
 
-void stdInt() {
+int stdInt() {
 
     char arg[MAX_RAWTEXT_LENGTH] = "";
-    textExpression(arg);
+    if (textExpression(arg)) { return 1; }
     sscanf(arg, "%lf", &returnNum);
     returnType = numtype;
 
-}
-
-void stdRound() {
-
+    return 0;
 }
