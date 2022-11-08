@@ -428,26 +428,26 @@ int handleFuncCall(lexeme identifier) {
         
         } else if (currentParam.type == numArrType) {
 
-            lexeme argument = nextLex();
-            int argumentTableIndex = findVar(argument.name);
-            variable argumentVar = varTable[argumentTableIndex];
+            double argument[MAX_ARRAY_LENGTH];
+            int argumentLength;
+            if (numArrExpression(argument, &argumentLength)) { return 1; }
 
-            // Copy thr array values
+            // Copy the array values
             addNumVar(currentParam.name, 0, 1);
-            for (int i = 0; i < argumentVar.arrLength; i++) {
-                varTable[argumentTableIndex].numValArr[i] = argumentVar.numValArr[i];
+            for (int i = 0; i < argumentLength; i++) {
+                varTable[varTableIndex].numValArr[i] = argument[i];
             }
 
         } else if (currentParam.type == textArrType) {
 
-            lexeme argument = nextLex();
-            int argumentTableIndex = findVar(argument.name);
-            variable argumentVar = varTable[argumentTableIndex];
+            char argument[MAX_ARRAY_LENGTH][MAX_RAWTEXT_LENGTH];
+            int argumentLength;
+            if (textArrExpression(argument, &argumentLength)) { return 1; }
 
-            // Copy thr array values
+            // Copy the array values
             addTextVar(currentParam.name, "", 1);
-            for (int i = 0; i < argumentVar.arrLength; i++) {
-                strcpy(varTable[argumentTableIndex].textValArr[i], argumentVar.textValArr[i]);
+            for (int i = 0; i < argumentLength; i++) {
+                strcpy(varTable[varTableIndex].textValArr[i], argument[i]);
             }
         }
 
