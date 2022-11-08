@@ -588,7 +588,7 @@ int numExpression(double* num) {
             
             // Grammer Check
             // Previous must be an operator or the first lex
-            if (!isOperator(lexList[lexIndex-1]) && pastFirst == 0) {
+            if (!isOperator(lexList[lexIndex-1]) && pastFirst == 1) {
                 raiseError(curLex, "Unexpected \"(\"");
                 return 1;
             }
@@ -753,7 +753,7 @@ int numExpression(double* num) {
             break;
         }
 
-        pastFirst = 1;
+        if (curLex.sym != lparensym) { pastFirst = 1; }
         curLex = nextLex();
 
     }
