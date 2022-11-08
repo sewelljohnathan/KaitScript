@@ -74,7 +74,7 @@ int stdInput() {
     double argNum;
     char argText[MAX_RAWTEXT_LENGTH] = "";
     if (textExpression(argText)) { return 1; }
-    printf("%s", argText);
+    printf(": %s", argText);
 
     char responseText[MAX_RAWTEXT_LENGTH] = "";
     fgets(responseText, sizeof(responseText), stdin);
