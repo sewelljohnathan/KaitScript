@@ -13,11 +13,11 @@ or
 
 ## Syntax
 
-The syntax for Kait is modeled off languages like Python, but with typing and bracket scoping for functions and loops
+The syntax for Kait is modeled off languages like Python, but with typing and bracket scoping for functions and loops.
 
 ### Variable Declaration
 
-There are two variable types: `num` and `text` (aka string)
+There are two variable types: `num` and `text` (aka string).
 Declare a variable:
 ```
 num pi = 3.1415
@@ -43,7 +43,7 @@ if a > b {
 }
 ```
 
-Conditional operators for text includes `==`, `!=`
+Conditional operators for text includes `==`, `!=`.
 ```
 text a = "alice"
 text b = "bob"
@@ -59,7 +59,7 @@ if a != b {
 
 ### Arrays
 
-Only 1-dimensinal arrays are allowed
+Only 1-dimensinal arrays are allowed.
 Declare an array:
 ```
 num numbers[] = [1, 2, 3, 4]
@@ -74,11 +74,11 @@ loop i from 1 to 5 {
     a = a + i
 }
 ```
-The variable `i` can have any name and does not need to be defined beforehand. It is implicitly of type `num`
+The variable `i` can have any name and does not need to be defined beforehand. It is implicitly of type `num`.
 
 ### Functions
 
-Functions can have return types of `num`, `text`, `num[]`, `text[]`, or none
+Functions can have return types of `num`, `text`, `num[]`, `text[]`, or none.
 
 No return type:
 ```
@@ -119,7 +119,7 @@ text t = str(2 * 4)
 
 ### Comments
 
-Use a `#` for single line comments
+Use a `#` for single line comments.
 Usage:
 ```
 # Comment
