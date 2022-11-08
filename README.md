@@ -72,6 +72,18 @@ function createNames() text[] {
 }
 ```
 
+### Built-in Functions
+#### I/O Functions
+```
+print("Hello world!")
+text response = input("Enter input > ")
+```
+#### Type Conversions
+```
+num n = int("123")
+text t = str(2 * 4)
+```
+
 ### Comments
 
 Use a `#` for single line comments
