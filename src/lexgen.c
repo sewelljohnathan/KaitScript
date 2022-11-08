@@ -187,6 +187,15 @@ sym_type checkReservedSyms(char* name) {
     if (strcmp(name, "to") == 0) {
         return tosym;
     }
+    if (strcmp(name, "if") == 0) {
+        return ifsym;
+    }
+    if (strcmp(name, "elif") == 0) {
+        return elifsym;
+    }
+    if (strcmp(name, "else") == 0) {
+        return elsesym;
+    }
 
     return identsym;
 }
@@ -199,8 +208,19 @@ sym_type checkOtherSyms(int* inputIndex, char* input) {
 
     switch (curChar) {
         case '=':
-            if (nextChar == '=') { curSym = deqsym; }
-            else { curSym = assignsym; (*inputIndex)++; }
+            if (nextChar == '=') { curSym = deqsym; (*inputIndex)++; }
+            else { curSym = assignsym; }
+        break;
+        case '!':
+            if (nextChar == '=') { curSym = neqsym; (*inputIndex)++; }
+        break;
+        case '>':
+            if (nextChar == '=') { curSym = geqsym; (*inputIndex)++; }
+            else { curSym = gtrsym; }
+        break;
+        case '<':
+            if (nextChar == '=') { curSym = leqsym; (*inputIndex)++; }
+            else { curSym = lsssym; }
         break;
 
         case '+': curSym = plussym; break;
