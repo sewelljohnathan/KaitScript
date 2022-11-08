@@ -7,7 +7,7 @@ A custom, interpreted programming language.
 The interpreter runs on files with the `.kait` file extension.
 
 To run the interpreter, type:
-`kait <options> file.kait`
+`kait file.kait <options>`
 or
 `kait -h`
 
