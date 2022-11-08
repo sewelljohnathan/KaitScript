@@ -24,6 +24,39 @@ num pi = 3.1415
 text myString = "Hello World!"
 ```
 
+### Conditional
+
+Conditional statements can be made with the `if`, `elif`, and `else` keywords.
+
+Conditional operators for numbers include `==`, `!=`, `>`, `>=`, `<`, `<=`.
+```
+num a = 1
+num b = 2
+
+num c = 0
+if a > b {
+    c = a
+} elif a == b {
+    c = a + b
+} else {
+    c = b
+}
+```
+
+Conditional operators for text includes `==`, `!=`
+```
+text a = "alice"
+text b = "bob"
+text c = ""
+
+if a == b {
+    c = a
+}
+if a != b {
+    c = b
+}
+```
+
 ### Arrays
 
 Only 1-dimensinal arrays are allowed
