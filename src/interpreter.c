@@ -48,6 +48,9 @@ int line() {
     else if (firstLex.sym == loopsym) {
         if (handleLoop()) { return 1; }
     }
+    else if (firstLex.sym == ifsym) {
+        if (handleIf()) { return 1; }
+    }
     else if (firstLex.sym == returnsym) {
         if (handleReturn()) { return 1; }
     }
@@ -551,6 +554,145 @@ int handleLoop() {
     return 0;
 }
 
+int handleIf() {
+
+    int seenElse = 0;
+    int foundTrue = 0;
+    lexeme curLex;
+
+    while (1) {
+        
+        int isTrue;
+        if (!seenElse) {
+
+            curLex = nextLex();
+            
+            // Determine if this is a mathematical or string conditional
+            int isNum;
+            if (curLex.sym == rawnumsym) {
+                isNum = 1;
+            } else if (curLex.sym == rawtextsym) {
+                isNum = 0;
+            } else if (curLex.sym == identsym) {
+
+                int tableIndex = findVar(curLex.name);
+                variable curVar = varTable[tableIndex];
+
+                if (curVar.type == numtype || curVar.type == numArrType) {
+                    isNum = 1;
+                } else if (curVar.type == texttype || curVar.type == textArrType) {
+                    isNum = 0;
+                }
+            }
+
+            lexIndex--;
+            if (isNum) {
+
+                // Get the values
+                double result1;
+                double result2;
+                if (numExpression(&result1)) { return 1; }
+                lexeme conditionalSwitch = nextLex();
+                if (numExpression(&result2)) { return 1; }
+                
+                // check the conditional
+                switch (conditionalSwitch.sym) {
+                    case deqsym: isTrue = result1 == result2; break;
+                    case neqsym: isTrue = result1 != result2; break;
+                    case gtrsym: isTrue = result1 > result2; break;
+                    case geqsym: isTrue = result1 >= result2; break;
+                    case lsssym: isTrue = result1 < result2; break;
+                    case leqsym: isTrue = result1 <= result2; break;
+                    default:
+                        raiseError(conditionalSwitch, "Expected a conditional switch"); 
+                        return 1; 
+                    break;
+                }
+
+            } else {
+
+                // Get the values
+                char text1[MAX_RAWTEXT_LENGTH];
+                char text2[MAX_RAWTEXT_LENGTH];
+                if (textExpression(text1)) { return 1; }
+                lexeme conditionalSwitch = nextLex();
+                if (textExpression(text2)) { return 1; }
+
+                // check the conditional
+                switch (conditionalSwitch.sym) {
+                    case deqsym: isTrue = strcmp(text1, text2) == 0; break;
+                    case neqsym: isTrue = strcmp(text1, text2) != 0; break;
+                    default: 
+                        raiseError(conditionalSwitch, "Expected a conditional switch"); 
+                        return 1; 
+                    break;
+                }
+
+            }
+
+        // If this is the else clause, always run
+        } else {
+            isTrue = 1;
+        }
+        // Eat the '{'
+        curLex = nextLex();
+        if (curLex.sym != lbracesym) { raiseError(curLex, "Expected \"{\""); return 1; }
+
+        // Run the conditional code
+        if (isTrue && !foundTrue) {
+            foundTrue = 1;
+            
+            while (lexList[lexIndex+1].sym != rbracesym) {
+                if (line()) { return 1; }
+            }
+
+        // Just eat code
+        } else {
+
+            int nestedLevel = 1;
+            lexeme next = nextLex();
+            while (1) {
+
+                if (next.sym == lbracesym) {
+                    nestedLevel++;
+                }
+                if (next.sym == rbracesym) {
+                    nestedLevel--;
+                }
+                if (next.sym == rbracesym && nestedLevel == 0) {
+                    break;
+                }
+
+                next = nextLex();
+            }
+
+            lexIndex--;
+        }
+
+        // Eat the '}'
+        curLex = nextLex();
+        if (curLex.sym != rbracesym) { raiseError(curLex, "Expected \"}\""); return 1; }
+
+        // Break if there is not another if clause
+        curLex = nextLex();
+
+        // Handle else
+        if (curLex.sym == elsesym) {
+            if (seenElse) { raiseError(curLex, "Cannot have multiple \"else\" clauses"); }
+            else { seenElse = 1; }
+        }
+
+        // Do another
+        if (!(curLex.sym == elifsym || curLex.sym == elsesym)) {
+            break;
+        }
+
+    }
+
+    lexIndex--;
+    return 0;
+}
+
 int handleReturn() {
 
     if (returnType == numtype) {
@@ -585,7 +727,7 @@ int numExpression(double* num) {
         // '('
         if (curLex.sym == lparensym) {
             seenLparen++;
-            
+
             // Grammer Check
             // Previous must be an operator or the first lex
             if (!isOperator(lexList[lexIndex-1]) && pastFirst == 1) {

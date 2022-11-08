@@ -23,6 +23,7 @@ int handleFuncDeclaration();
 int handleVarAssignment();
 int handleFuncCall(lexeme identifier);
 int handleLoop();
+int handleIf();
 int handleReturn();
 int numExpression(double* num);
 int numArrExpression(double* arr, int* length);
