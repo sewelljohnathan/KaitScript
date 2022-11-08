@@ -49,12 +49,7 @@ int line() {
         if (handleLoop()) { return 1; }
     }
     else if (firstLex.sym == returnsym) {
-
-        if (returnType == numtype) {
-            if (numExpression(&returnNum)) { return 1; }
-        } else if (returnType == texttype) {
-            if (textExpression(returnText)) { return 1; }
-        }
+        if (handleReturn()) { return 1; }
     }
     else if (firstLex.sym == -1) {
         return 0;
@@ -71,14 +66,42 @@ int handleNumDeclaration() {
     lexeme identifier = nextLex();
     if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); return 1; }
 
+    // Check if this is an array declaration
+    int isArr = 0;
+    lexeme lbracket = nextLex();
+    if (lbracket.sym == lbracketsym) {
+
+        lexeme rbracket = nextLex();
+        if (rbracket.sym != rbracketsym) { raiseError(rbracket, "Expected \"]\""); return 1; }
+
+        isArr = 1;
+    } else {
+        lexIndex--;
+    }
+
     // Assignment '='
     lexeme eqlsign = nextLex();
     if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); return 1; }
 
     // Create the new variable
-    double value;
-    if (numExpression(&value)) { return 1; }
-    addNumVar(identifier.name, value);
+    if (isArr) {
+
+        double arr[MAX_ARRAY_LENGTH];
+        int arrLength;
+        if (numArrExpression(arr, &arrLength)) { return 1; }
+
+        addNumVar(identifier.name, 0, 1);
+        for (int i = 0; i < arrLength; i++) {
+            varTable[varTableIndex].numValArr[i] = arr[i];
+        }
+        varTable[varTableIndex].arrLength = arrLength;
+
+    } else {
+        double value;
+        if (numExpression(&value)) { return 1; }
+        addNumVar(identifier.name, value, 0);
+    }
+    
 
     return 0;
 }
@@ -89,14 +112,44 @@ int handleTextDeclaration() {
     lexeme identifier = nextLex();
     if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); return 1; }
 
+    // Check if this is an array declaration
+    int isArr = 0;
+    lexeme lbracket = nextLex();
+    if (lbracket.sym == lbracketsym) {
+
+        lexeme rbracket = nextLex();
+        if (rbracket.sym != rbracketsym) { raiseError(rbracket, "Expected \"]\""); return 1; }
+
+        isArr = 1;
+    } else {
+        lexIndex--;
+    }
+
     // Assignment '='
     lexeme eqlsign = nextLex();
     if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); return 1; }
 
     // Create the new variable
-    char text[MAX_RAWTEXT_LENGTH] = "";
-    if (textExpression(text)) { return 1; }
-    addTextVar(identifier.name, text);
+    if (isArr) {
+
+        char arr[MAX_ARRAY_LENGTH][MAX_RAWTEXT_LENGTH];
+        int arrLength;
+        if (textArrExpression(arr, &arrLength)) { return 1; }
+
+        addTextVar(identifier.name, "", 1);
+        for (int i = 0; i < arrLength; i++) {
+            strcpy(varTable[varTableIndex].textValArr[i], arr[i]);
+        }
+        varTable[varTableIndex].arrLength = arrLength;
+
+    } else {
+
+        char text[MAX_RAWTEXT_LENGTH] = "";
+        if (textExpression(text)) { return 1; }
+        addTextVar(identifier.name, text, 0);
+    }
+
+
 
     return 0;
 }
@@ -123,18 +176,38 @@ int handleFuncDeclaration() {
         
         // Param name
         lexeme paramIdentifier = nextLex();
-        if (paramIdentifier.sym != identsym) { raiseError(paramIdentifier, "Expected identifier."); return 1; }       
+        if (paramIdentifier.sym != identsym) { raiseError(paramIdentifier, "Expected identifier."); return 1; }  
+
+        int isArr = 0;
+        lexeme lbracket = nextLex();
+        if (lbracket.sym == lbracketsym) {
+
+            lexeme rbracket = nextLex();
+            if (rbracket.sym != rbracketsym) { raiseError(rbracket, "Expected \"]\""); return 1; }
+
+            isArr = 1;
+        } else {
+            lexIndex--;
+        }
 
         // Add the param to the list
         funcParam* curParam = &funcParams[funcParamLength++];
         strcpy(curParam->name, paramIdentifier.name);
 
         if (paramType.sym == numsym) {
-            curParam->type = numtype;
+            if (isArr) {
+                curParam->type = numArrType;
+            } else {
+                curParam->type = numtype;
+            }
         } else if (paramType.sym == textsym) {
-            curParam->type = texttype;
+            if (isArr) {
+                curParam->type = textArrType;
+            } else {
+                curParam->type = texttype;
+            }
         } else {
-            // Error
+            raiseError(paramType, "Expected \"num\" or \"text\"");
             return 1;
         }
         
@@ -156,13 +229,36 @@ int handleFuncDeclaration() {
     // Get the func type
     lexeme next = nextLex();
     varType funcType;
-    if (next.sym == numsym) {
-        funcType = numtype;
-    } else if (next.sym == textsym) {
-        funcType = texttype;
+
+    // Check if it is an array
+    int isArr = 0;
+    lexeme lbracket = nextLex();
+    if (lbracket.sym == lbracketsym) {
+
+        lexeme rbracket = nextLex();
+        if (rbracket.sym != rbracketsym) { raiseError(rbracket, "Expected \"]\""); return 1; }
+
+        isArr = 1;
+    } else {
+        lexIndex--;
     }
 
-    // This is in case there is no type listed (i.e. a nonetype)
+    // Set the func type
+    if (next.sym == numsym) {
+        if (isArr) {
+            funcType = numArrType;
+        } else {
+            funcType = numtype;
+        }
+    } else if (next.sym == textsym) {
+        if (isArr) {
+            funcType = textArrType;
+        } else {
+            funcType = texttype;
+        }
+    }
+
+    // This check is in case there is no type listed (i.e. a nonetype)
     if (next.sym != lbracesym) {
         // Opening Brace
         lexeme lbrace = nextLex();
@@ -204,19 +300,88 @@ int handleVarAssignment() {
 
     if (!curVar.isFunc) {
 
-        // Assignment '='
-        lexeme eqlsign = nextLex();
-        if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); return 1; }
+        if (curVar.isArr) {
+            
+            // Opening brakcet
+            lexeme lbracket = nextLex();
+            if (lbracket.sym == assignsym) {
+                
+                // Assign 
+                if (curVar.type == numArrType) {
+                    double arr[MAX_ARRAY_LENGTH];
+                    int arrLength;
+                    if (numArrExpression(arr, &arrLength)) { return 1; }
 
-        if (curVar.type == numtype) {
-            double value;
-            if (numExpression(&value)) { return 1; }
-            varTable[tableIndex].numVal = value;
-        } else if (curVar.type == texttype) {
-            char text[MAX_RAWTEXT_LENGTH] = "";
-            if (textExpression(text)) { return 1; }
-            strcpy(varTable[tableIndex].textVal, text);
-        }
+                    for (int i = 0; i < arrLength; i++) {
+                        varTable[tableIndex].numValArr[i] = arr[i];
+                    }
+                    varTable[tableIndex].arrLength = arrLength;
+
+                } else if (curVar.type == textArrType) {
+                    char arr[MAX_ARRAY_LENGTH][MAX_RAWTEXT_LENGTH];
+                    int arrLength;
+                    if (textArrExpression(arr, &arrLength)) { return 1; }
+
+                    for (int i = 0; i < arrLength; i++) {
+                        strcpy(varTable[tableIndex].textValArr[i], arr[i]);
+                    }
+                    varTable[tableIndex].arrLength = arrLength;
+                }
+
+                return 0;
+            }
+            if (lbracket.sym != lbracketsym) { raiseError(lbracket, "Expected \"[\""); return 1; }
+
+            // Find the index
+            int arrIndex;
+            double arrIndexInput;
+            if (numExpression(&arrIndexInput)) { return 1; }
+            if (floor(arrIndexInput) != ceil(arrIndexInput)) { printf("Expected an integer"); return 1; }
+            arrIndex = (int) (arrIndexInput);
+
+            // Closing bracket
+            lexeme rbracket = nextLex();
+            if (rbracket.sym != rbracketsym) { raiseError(rbracket, "Expected \"]\""); return 1; }
+
+            // Assignment '='
+            lexeme eqlsign = nextLex();
+            if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); return 1; }
+
+            // number
+            if (curVar.type == numArrType) {
+                double value;
+                if (numExpression(&value)) { return 1; }
+                varTable[tableIndex].numValArr[arrIndex] = value;
+
+            // text
+            } else if (curVar.type == textArrType) {
+                char text[MAX_RAWTEXT_LENGTH] = "";
+                if (textExpression(text)) { return 1; }
+                strcpy(varTable[tableIndex].textValArr[arrIndex], text);
+
+            }
+
+        } else {
+
+            // Assignment '='
+            lexeme eqlsign = nextLex();
+            if (eqlsign.sym != assignsym) { raiseError(eqlsign, "Expected \"=\"."); return 1; }
+
+            // number
+            if (curVar.type == numtype) {
+                double value;
+                if (numExpression(&value)) { return 1; }
+                varTable[tableIndex].numVal = value;
+
+            // text
+            } else if (curVar.type == texttype) {
+                char text[MAX_RAWTEXT_LENGTH] = "";
+                if (textExpression(text)) { return 1; }
+                strcpy(varTable[tableIndex].textVal, text);
+
+            }
+        } 
+
     } else {
         if (handleFuncCall(identifier)) { return 1; }
     }
@@ -245,17 +410,42 @@ int handleFuncCall(lexeme identifier) {
     varLevel++;
     for (int i = 0; i < funcVar.funcParamsLength; i++) {
 
+        funcParam currentParam = funcVar.funcParams[i];
+
         // Copy the arg values into new variables with the param names
-        if (funcVar.funcParams[i].type == numtype) {
+        if (currentParam.type == numtype) {
             double argVal;
             if (numExpression(&argVal)) { return 1; }
-            addNumVar(funcVar.funcParams[i].name, argVal);
+            addNumVar(currentParam.name, argVal, 0);
 
-        } else if (funcVar.funcParams[i].type == texttype) {
+        } else if (currentParam.type == texttype) {
             char argVal[MAX_RAWTEXT_LENGTH] = "";
             if (textExpression(argVal)) { return 1; }
-            addTextVar(funcVar.funcParams[i].name, argVal);
+            addTextVar(currentParam.name, argVal, 0);
         
+        } else if (currentParam.type == numArrType) {
+
+            lexeme argument = nextLex();
+            int argumentTableIndex = findVar(argument.name);
+            variable argumentVar = varTable[argumentTableIndex];
+
+            // Copy thr array values
+            addNumVar(currentParam.name, 0, 1);
+            for (int i = 0; i < argumentVar.arrLength; i++) {
+                varTable[argumentTableIndex].numValArr[i] = argumentVar.numValArr[i];
+            }
+
+        } else if (currentParam.type == textArrType) {
+
+            lexeme argument = nextLex();
+            int argumentTableIndex = findVar(argument.name);
+            variable argumentVar = varTable[argumentTableIndex];
+
+            // Copy thr array values
+            addTextVar(currentParam.name, "", 1);
+            for (int i = 0; i < argumentVar.arrLength; i++) {
+                strcpy(varTable[argumentTableIndex].textValArr[i], argumentVar.textValArr[i]);
+            }
         }
 
         // Check if the next symbol is a command, or a ')' if this is the last arg
@@ -305,7 +495,7 @@ int handleLoop() {
     lexeme identifier = nextLex();
     if (identifier.sym != identsym) { raiseError(identifier, "Expected identifier."); return 1; }
 
-    addNumVar(identifier.name, 0);
+    addNumVar(identifier.name, 0, 0);
     int tableIndex = varTableIndex;
 
     // From keyword
@@ -359,6 +549,19 @@ int handleLoop() {
     varLevel--;
     
     return 0;
+}
+
+int handleReturn() {
+
+    if (returnType == numtype) {
+        if (numExpression(&returnNum)) { return 1; }
+    } else if (returnType == texttype) {
+        if (textExpression(returnText)) { return 1; }
+    } else if (returnType == numArrType) {
+        if (numArrExpression(returnNumArr, &returnArrLength)) { return 1; }
+    } else if (returnType == textArrType) {
+        if (textArrExpression(returnTextArr, &returnArrLength)) { return 1; }
+    }
 }
 
 int numExpression(double* num) {
@@ -494,7 +697,8 @@ int numExpression(double* num) {
             if (
                 lexList[lexIndex-1].sym == rawnumsym || 
                 lexList[lexIndex-1].sym == identsym || 
-                lexList[lexIndex-1].sym == rparensym) {
+                lexList[lexIndex-1].sym == rparensym ||
+                lexList[lexIndex-1].sym == rbracketsym) {
                 break;
             }
 
@@ -512,7 +716,33 @@ int numExpression(double* num) {
                 shuntingOutput[++shuntingOutputIndex] = insertLex;
             }
             else {
-                shuntingOutput[++shuntingOutputIndex] = curLex;
+                
+                // If an array, hacky inject a lex
+                if (curVar.isArr) { 
+
+                    lexeme arrLbracket = nextLex();
+                    if (arrLbracket.sym != lbracketsym) { raiseError(arrLbracket, "Expected \"[\""); return 1; }
+
+                    // Get the index
+                    int arrIndex;
+                    double arrIndexInput;
+                    if (numExpression(&arrIndexInput)) { return 1; }
+                    if (floor(arrIndexInput) != ceil(arrIndexInput)) { printf("Expected an integer."); return 1; }
+                    arrIndex = (int) (arrIndexInput);
+
+                    lexeme arrRbracket = nextLex();
+                    if (arrRbracket.sym != rbracketsym) { raiseError(arrRbracket, "Expected \"]\""); return 1; }
+
+                    // Insert
+                    lexeme insertLex;
+                    insertLex.sym = rawnumsym;
+                    insertLex.numval = curVar.numValArr[arrIndex];
+
+                    shuntingOutput[++shuntingOutputIndex] = insertLex;
+                    
+                } else {
+                    shuntingOutput[++shuntingOutputIndex] = curLex;
+                }
             }
 
             if (negateNum) { 
@@ -596,6 +826,95 @@ int numExpression(double* num) {
     return 0;
 }
 
+int numArrExpression(double* arr, int* length) {
+    
+    int arrLength = 0;
+
+    lexeme curLex;
+
+    // Loop through the expression
+    int expectPlus = 0;
+    while (1) {
+
+        curLex = nextLex();
+
+        // Check if plus
+        if (curLex.sym == plussym) {
+            if (expectPlus) {
+                expectPlus = 0;
+                continue;
+            } else {
+                raiseError(curLex, "Expected an array"); 
+                return 1;
+            }
+        }
+
+        // Nothing left
+        if (curLex.sym != plussym && expectPlus) {
+            break;
+        }
+
+        // Variable
+        if (curLex.sym == identsym) {
+            int tableIndex = findVar(curLex.name);
+            variable curVar = varTable[tableIndex];
+
+            // Return a function
+            if (curVar.isFunc) {
+                if (handleFuncCall(curLex)) { return 1; }   
+                for (int i = 0; i < returnArrLength; i++) {
+                    arr[arrLength++] = returnNumArr[i];
+                }
+            
+            // Variable[]
+            } else {
+                for (int i = 0; i < curVar.arrLength; i++) {
+                    arr[arrLength++] = curVar.numValArr[i];
+                }
+            }
+
+            expectPlus = 1;
+            continue;
+        }
+
+        // subarr
+        else if (curLex.sym == lbracketsym) {
+
+            while (1) {
+
+                curLex = nextLex();
+                if (curLex.sym == rbracketsym) {
+                    break;
+                }
+                // Revert 1 for numExpression
+                lexIndex--;
+
+                // Get the next
+                double nextValue;
+                if (numExpression(&nextValue)) { return 1; }
+                arr[arrLength++] = nextValue;
+
+                // Get the ',' or ']'
+                curLex = nextLex();
+                if (curLex.sym == commasym) {
+                    continue;
+                } else if (curLex.sym == rbracketsym) {
+                    break;
+                } else {
+                    raiseError(curLex, "Expected \",\" or \"]\""); return 1;
+                }
+            }
+
+            expectPlus = 1;
+        }
+    }
+    *length = arrLength;
+
+    lexIndex--;
+    
+    return 0;
+}
+
 int textExpression(char* text) {
 
     int seenFirstSym = 0;
@@ -639,10 +958,37 @@ int textExpression(char* text) {
                 if (handleFuncCall(curLex)) { return 1; }
                 strcat(bufferText, returnText);
             } else {
-                // If the var is a number, hacky convert it
-                if (curVar.type == numtype) {
-                    convertNumToText(curVar.numVal, curVar.textVal);
+                
+                if (curVar.isArr) {
+
+                    lexeme arrLbracket = nextLex();
+                    if (arrLbracket.sym != lbracketsym) { raiseError(arrLbracket, "Expected \"[\""); return 1; }
+
+                    // Get the index
+                    int arrIndex;
+                    double arrIndexInput;
+                    if (numExpression(&arrIndexInput)) { return 1; }
+                    if (floor(arrIndexInput) != ceil(arrIndexInput)) { printf("Expected an integer."); return 1; }
+                    arrIndex = (int) (arrIndexInput);
+
+                    lexeme arrRbracket = nextLex();
+                    if (arrRbracket.sym != rbracketsym) { raiseError(arrRbracket, "Expected \"]\""); return 1; }
+
+                    // Copy the value in text
+                    
+                    if (curVar.type == numArrType) {
+                        convertNumToText(curVar.numValArr[arrIndex], curVar.textVal);
+                    } else if (curVar.type == textArrType) {
+                        strcpy(curVar.textVal, curVar.textValArr[arrIndex]);
+                    }
+                } else {
+
+                    // If the var is a number, hacky convert it
+                    if (curVar.type == numtype) {
+                        convertNumToText(curVar.numVal, curVar.textVal);
+                    }
                 }
+                    
                 strcat(bufferText, curVar.textVal);
             }
 
@@ -658,5 +1004,94 @@ int textExpression(char* text) {
     strcpy(text, bufferText);
     lexIndex--;
 
+    return 0;
+}
+
+int textArrExpression(char arr[MAX_ARRAY_LENGTH][MAX_RAWTEXT_LENGTH], int* length) {
+    
+    int arrLength = 0;
+
+    lexeme curLex;
+
+    // Loop through the expression
+    int expectPlus = 0;
+    while (1) {
+
+        curLex = nextLex();
+
+        // Check if plus
+        if (curLex.sym == plussym) {
+            if (expectPlus) {
+                expectPlus = 0;
+                continue;
+            } else {
+                raiseError(curLex, "Expected an array"); 
+                return 1;
+            }
+        }
+
+        // Nothing left
+        if (curLex.sym != plussym && expectPlus) {
+            break;
+        }
+
+        // Variable
+        if (curLex.sym == identsym) {
+            int tableIndex = findVar(curLex.name);
+            variable curVar = varTable[tableIndex];
+
+            // Return a function
+            if (curVar.isFunc) {
+                if (handleFuncCall(curLex)) { return 1; }   
+                for (int i = 0; i < returnArrLength; i++) {
+                    strcpy(arr[arrLength++], returnTextArr[i]);
+                }
+            
+            // Variable[]
+            } else {
+                for (int i = 0; i < curVar.arrLength; i++) {
+                    strcpy(arr[arrLength++], curVar.textValArr[i]);
+                }
+            }
+
+            expectPlus = 1;
+            continue;
+        }
+
+        // subarr
+        else if (curLex.sym == lbracketsym) {
+
+            while (1) {
+
+                curLex = nextLex();
+                if (curLex.sym == rbracketsym) {
+                    break;
+                }
+                // Revert 1 for numExpression
+                lexIndex--;
+
+                // Get the next
+                char nextValue[MAX_RAWTEXT_LENGTH];
+                if (textExpression(nextValue)) { return 1; }
+                strcpy(arr[arrLength++], nextValue);
+
+                // Get the ',' or ']'
+                curLex = nextLex();
+                if (curLex.sym == commasym) {
+                    continue;
+                } else if (curLex.sym == rbracketsym) {
+                    break;
+                } else {
+                    raiseError(curLex, "Expected \",\" or \"]\""); return 1;
+                }
+            }
+
+            expectPlus = 1;
+        }
+    }
+    *length = arrLength;
+
+    lexIndex--;
+    
     return 0;
 }

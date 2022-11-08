@@ -52,22 +52,26 @@ void printVarTable() {
 
 }
 
-void addNumVar(char* name, double value) {
+void addNumVar(char* name, double value, int isArr) {
 
     variable* curVar = &(varTable[++varTableIndex]);
     strcpy(curVar->name, name);
-    curVar->type = numtype;
+    if (isArr) { curVar->type = numArrType; } else { curVar->type = numtype; }
     curVar->isFunc = 0;
+    curVar->isArr = isArr;
+    curVar->arrLength = 0;
     curVar->numVal = value;
     curVar->level = varLevel;
 }
 
-void addTextVar(char* name, char* text) {
+void addTextVar(char* name, char* text, int isArr) {
 
     variable* curVar = &varTable[++varTableIndex];
     strcpy(curVar->name, name);
-    curVar->type = texttype;
+    if (isArr) { curVar->type = textArrType; } else { curVar->type = texttype; }
     curVar->isFunc = 0;
+    curVar->isArr = isArr;
+    curVar->arrLength = 0;
     strcpy(curVar->textVal, text);
     curVar->level = varLevel;
 }

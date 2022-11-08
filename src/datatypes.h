@@ -1,9 +1,9 @@
 #define MAX_VARIABLE_NAME_LENGTH 20
-#define MAX_VARIABLE_COUNT 10
+#define MAX_VARIABLE_COUNT 100
 #define MAX_RAWTEXT_LENGTH 100
-#define MAX_FUNC_PARAMS 10
-#define MAX_LEXEME_LIST_LENGTH 100
-
+#define MAX_FUNC_PARAMS 100
+#define MAX_LEXEME_LIST_LENGTH 1000
+#define MAX_ARRAY_LENGTH 100
 
 
 typedef enum sym_type {
@@ -18,7 +18,7 @@ typedef enum sym_type {
 
 
 typedef enum varType {
-    numtype = 0, texttype, nonetype
+    numtype = 0, texttype, nonetype, numArrType, textArrType
 } varType;
 
 
@@ -44,9 +44,13 @@ typedef struct variable {
     char name[MAX_VARIABLE_NAME_LENGTH];
     varType type;
     int isFunc;
+    int isArr;
+    int arrLength;
 
     double numVal;
+    double numValArr[MAX_ARRAY_LENGTH];
     char textVal[MAX_RAWTEXT_LENGTH];
+    char textValArr[MAX_ARRAY_LENGTH][MAX_RAWTEXT_LENGTH];
     int funcStart;
     funcParam funcParams[MAX_FUNC_PARAMS];
     int funcParamsLength;

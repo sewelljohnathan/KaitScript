@@ -5,7 +5,10 @@ int varTableIndex;
 int varLevel;
 
 double returnNum;
+double returnNumArr[MAX_ARRAY_LENGTH];
 char returnText[MAX_RAWTEXT_LENGTH];
+char returnTextArr[MAX_ARRAY_LENGTH][MAX_RAWTEXT_LENGTH];
+int returnArrLength;
 varType returnType;
 
 lexeme* lexList;
@@ -20,16 +23,19 @@ int handleFuncDeclaration();
 int handleVarAssignment();
 int handleFuncCall(lexeme identifier);
 int handleLoop();
+int handleReturn();
 int numExpression(double* num);
+int numArrExpression(double* arr, int* length);
 int textExpression(char* text);
+int textArrExpression(char arr[MAX_ARRAY_LENGTH][MAX_RAWTEXT_LENGTH], int* length);
 
 // interpreter tools
 lexeme nextLex();
 int findVar(char* name);
 void markVars();
 void printVarTable();
-void addNumVar(char* name, double value);
-void addTextVar(char* name, char* text);
+void addNumVar(char* name, double value, int isArr);
+void addTextVar(char* name, char* text, int isArr);
 void addFuncVar(char* name, funcParam* funcParams, int funcParamLength, int funcStart, varType funcType);
 int isOperator(lexeme lex);
 int operatorPrecedence(lexeme lex);
