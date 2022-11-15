@@ -79,6 +79,9 @@ int stdInput() {
     char responseText[MAX_RAWTEXT_LENGTH] = "";
     fgets(responseText, sizeof(responseText), stdin);
 
+    // Get rid of newline
+    responseText[strcspn(responseText, "\r\n")] = '\0';
+
     strcpy(returnText, responseText);
 
     return 0;
