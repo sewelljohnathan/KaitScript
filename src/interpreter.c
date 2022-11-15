@@ -557,7 +557,7 @@ int handleLoop() {
 
     // Do the loop
     int startLexIndex = lexIndex;
-    for (int i = start; i <= end; i++) {
+    for (int i = start; i < end; i++) {
 
         // Increase the counter variable
         varTable[tableIndex].numVal = i;
