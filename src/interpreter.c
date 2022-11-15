@@ -754,6 +754,8 @@ int handleReturn() {
     } else if (returnType == textArrType) {
         if (textArrExpression(returnTextArr, &returnArrLength)) { return 1; }
     }
+
+    return 0;
 }
 
 int numExpression(double* num) {
