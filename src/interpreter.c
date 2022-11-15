@@ -13,6 +13,7 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
     varTable = malloc(sizeof(variable) * MAX_VARIABLE_COUNT);
     varTableIndex = -1;
     varLevel = 0;
+    returnType = nonetype;
     foundContinue = 0;
     foundBreak = 0;
     setStandards();
@@ -403,6 +404,9 @@ int handleVarAssignment() {
 
 int handleFuncCall(lexeme identifier) {
 
+    // Cache the original return type to revert after call
+    varType originalReturnType = returnType;
+
     // Get the table entry
     int tableIndex = findVar(identifier.name);
     variable funcVar = varTable[tableIndex];
@@ -410,7 +414,7 @@ int handleFuncCall(lexeme identifier) {
 
     switch (checkStandards(identifier.name)) {
         case 1: return 1; break;
-        case -1: return 0; break;
+        case -1: returnType = originalReturnType; return 0; break;
         // case 0: keep going, was not in standards
     }
 
@@ -491,6 +495,7 @@ int handleFuncCall(lexeme identifier) {
     markVars();
     varLevel--;
     lexIndex = oldIndex;
+    returnType = originalReturnType;
     
     return 0;
 }
@@ -1202,7 +1207,7 @@ int textExpression(char* text) {
 }
 
 int textArrExpression(char arr[MAX_ARRAY_LENGTH][MAX_RAWTEXT_LENGTH], int* length) {
-    
+
     int arrLength = 0;
 
     lexeme curLex;
