@@ -68,10 +68,21 @@ text names[] = ["bob", "alice"]
 
 ### Loops
 
+Loop a defined number of times
 ```
 num a = 0
 loop i from 1 to 5 {
     a = a + i
+}
+```
+Infinite loop that must be terminated by a `break`
+```
+num a = 0
+loop i {
+    a = a + i
+    if a > 20 {
+        break
+    }
 }
 ```
 The variable `i` can have any name and does not need to be defined beforehand. It is implicitly of type `num`.
