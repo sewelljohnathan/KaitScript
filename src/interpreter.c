@@ -1006,6 +1006,15 @@ int numExpression(double* num) {
                 case subsym: newValue = prevValue2 - prevValue1; break;
                 case multsym: newValue = prevValue2 * prevValue1; break;
                 case divsym: newValue = prevValue2 / prevValue1; break;
+                case modsym:
+                    if (floor(prevValue1) != ceil(prevValue1) || floor(prevValue2) != ceil(prevValue2)) {
+                        printf("Cannot take modulus of non integers.\nFound at row %d.\n", nextOutput.row);
+                        return 1;
+                    }
+                    int prevInt1 = (int) (prevValue1);
+                    int prevInt2 = (int) (prevValue2);
+                    newValue = prevInt2 % prevInt1;
+                break;
                 case expsym:
                     if (prevValue2 < 0 && floor(prevValue1) != ceil(prevValue1)) {
                         printf("Cannot take fractional exponents of negative numbers.\nFound at row %d.\n", nextOutput.row);

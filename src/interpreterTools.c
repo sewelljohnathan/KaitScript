@@ -97,6 +97,7 @@ int isOperator(lexeme lex) {
         case subsym: return 1; break;
         case multsym: return 1; break;
         case divsym: return 1; break;
+        case modsym: return 1; break;
         case expsym: return 1; break;
         default: return 0; break;
     }
@@ -108,6 +109,7 @@ int operatorPrecedence(lexeme lex) {
         case subsym: return 1; break;
         case multsym: return 2; break;
         case divsym: return 2; break;
+        case modsym: return 2; break;
         case expsym: return 3; break;
         case lparensym: return 0; break;
         default: return -1; break;
