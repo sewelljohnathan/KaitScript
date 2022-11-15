@@ -4,6 +4,7 @@
 #define MAX_FUNC_PARAMS 100
 #define MAX_LEXEME_LIST_LENGTH 1000
 #define MAX_ARRAY_LENGTH 100
+#define MAX_LOOP_ITERATIONS 1000000
 
 
 typedef enum sym_type {

@@ -513,30 +513,47 @@ int handleLoop() {
     // From keyword
     lexeme from = nextLex();
 
-    // Get the start number
-    double startInput;
-    if (numExpression(&startInput)) { return 1; }
-    if (floor(startInput) != ceil(startInput)) {
-        printf("Expected an integer."); return 1;
+    // Normal
+    if (from.sym == fromsym) {
+
+        // Get the start number
+        double startInput;
+        if (numExpression(&startInput)) { return 1; }
+        if (floor(startInput) != ceil(startInput)) {
+            printf("Expected an integer."); return 1;
+        } else {
+            start = (int) (startInput);
+        }
+
+        // To keyword
+        lexeme to = nextLex();
+
+        // Get the end number
+        double endInput;
+        if (numExpression(&endInput)) { return 1; }
+        if (floor(endInput) != ceil(endInput)) {
+            printf("Expected an integer"); return 1;
+        } else {
+            end = (int) (endInput);
+        }
+
+        // {
+        lexeme lbrace = nextLex();
+        if (lbrace.sym != lbracesym) { raiseError(lbrace, "Expected \"{\"."); return 1; }
+    
+    // If this is an infinite loop
+    } else if (from.sym == lbracesym) {
+        start = 0;
+        end = MAX_LOOP_ITERATIONS;
     } else {
-        start = (int) (startInput);
+        raiseError(from, "Expected \"from\" or \"{\"."); return 1;
     }
 
-    // To keyword
-    lexeme to = nextLex();
-
-    // Get the end number
-    double endInput;
-    if (numExpression(&endInput)) { return 1; }
-    if (floor(endInput) != ceil(endInput)) {
-        printf("Expected an integer"); return 1;
-    } else {
-        end = (int) (endInput);
+    // Check if there are not too many iterations
+    if (end - start > MAX_LOOP_ITERATIONS) {
+        printf("Too many loop iterations attempted."); return 1;
     }
-   
-    // {
-    lexeme lbrace = nextLex();
-    if (lbrace.sym != lbracesym) { raiseError(lbrace, "Expected \"{\"."); return 1; }
+
 
     // Do the loop
     int startLexIndex = lexIndex;
