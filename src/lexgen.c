@@ -228,6 +228,12 @@ sym_type checkOtherSyms(int* inputIndex, char* input) {
             if (nextChar == '=') { curSym = leqsym; (*inputIndex)++; }
             else { curSym = lsssym; }
         break;
+        case '&':
+            if (nextChar == '&') { curSym = andsym; (*inputIndex)++; }
+        break;
+        case '|':
+            if (nextChar == '|') { curSym = orsym; (*inputIndex)++; }
+        break;
 
         case '+': curSym = plussym; break;
         case '-': curSym = subsym; break;

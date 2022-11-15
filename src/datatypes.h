@@ -13,7 +13,7 @@ typedef enum sym_type {
     lparensym, rparensym, lbracesym, rbracesym, lbracketsym, rbracketsym,
     plussym, subsym, multsym, divsym, expsym,
     deqsym, neqsym, gtrsym, geqsym, lsssym, leqsym,
-    ifsym, elifsym, elsesym, returnsym,
+    ifsym, elifsym, elsesym, andsym, orsym, returnsym,
     commasym,
 
 } sym_type;
