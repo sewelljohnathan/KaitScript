@@ -53,7 +53,7 @@ int checkStandards(char* name) {
 void setStandards() {
 
     funcParam funcParams[1];
-    addFuncVar("print", funcParams, 0, 0, texttype);
+    addFuncVar("print", funcParams, 0, 0, nonetype);
     addFuncVar("input", funcParams, 0, 0, texttype);
     addFuncVar("str", funcParams, 0, 0, texttype);
     addFuncVar("int", funcParams, 0, 0, numtype);
