@@ -7,7 +7,8 @@
 
 
 typedef enum sym_type {
-    numsym = 0, textsym, identsym, rawnumsym, rawtextsym, assignsym, functionsym, loopsym, fromsym, tosym,
+    numsym = 0, textsym, identsym, rawnumsym, rawtextsym, assignsym, functionsym, 
+    loopsym, fromsym, tosym, continuesym, breaksym,
     lparensym, rparensym, lbracesym, rbracesym, lbracketsym, rbracketsym,
     plussym, subsym, multsym, divsym, expsym,
     deqsym, neqsym, gtrsym, geqsym, lsssym, leqsym,

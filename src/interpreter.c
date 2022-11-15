@@ -13,6 +13,8 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
     varTable = malloc(sizeof(variable) * MAX_VARIABLE_COUNT);
     varTableIndex = -1;
     varLevel = 0;
+    foundContinue = 0;
+    foundBreak = 0;
     setStandards();
     
     lexList = input;
@@ -54,6 +56,12 @@ int line() {
     else if (firstLex.sym == returnsym) {
         if (handleReturn()) { return 1; }
     }
+    else if (firstLex.sym == continuesym) {
+        foundContinue = 1;
+    }
+    else if (firstLex.sym == breaksym) {
+        foundBreak = 1;
+    }
     else if (firstLex.sym == -1) {
         return 0;
     } else {
@@ -61,6 +69,7 @@ int line() {
         return 1;
     }
 
+    return 0;
 }
 
 int handleNumDeclaration() {
@@ -540,8 +549,40 @@ int handleLoop() {
         lexIndex = startLexIndex;
         while (lexList[lexIndex+1].sym != rbracesym) {
             if (line()) { return 1; }
+            
+            // Check if a continue/break was found
+            if (foundContinue || foundBreak) {
+                break;
+            }
+        }
+
+        // If there was a break, end here
+        foundContinue = 0;
+        if (foundBreak) {
+            break;
         }
         
+    }
+    foundBreak = 0;
+
+    /*
+    Go back to the start and eat the entire loop.
+    If a continue is the seen in the last loop iteration, then problems were caused.
+    Additionally, this is easier than trying to know how to jump to the end after a break
+    */
+    if (1) {
+        lexIndex = startLexIndex;
+
+        int nestedLevel = 1;
+        lexeme next = nextLex();
+        while (1) {
+
+            if (next.sym == lbracesym) { nestedLevel++; }
+            if (next.sym == rbracesym) { nestedLevel--; }
+            if (next.sym == rbracesym && nestedLevel == 0) { break; }
+            next = nextLex();
+        }
+        lexIndex--;
     }
     
     // }
@@ -653,19 +694,11 @@ int handleIf() {
             lexeme next = nextLex();
             while (1) {
 
-                if (next.sym == lbracesym) {
-                    nestedLevel++;
-                }
-                if (next.sym == rbracesym) {
-                    nestedLevel--;
-                }
-                if (next.sym == rbracesym && nestedLevel == 0) {
-                    break;
-                }
-
+                if (next.sym == lbracesym) { nestedLevel++; }
+                if (next.sym == rbracesym) { nestedLevel--; }
+                if (next.sym == rbracesym && nestedLevel == 0) { break; }
                 next = nextLex();
             }
-
             lexIndex--;
         }
 

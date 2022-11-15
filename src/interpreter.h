@@ -11,6 +11,9 @@ char returnTextArr[MAX_ARRAY_LENGTH][MAX_RAWTEXT_LENGTH];
 int returnArrLength;
 varType returnType;
 
+int foundContinue;
+int foundBreak;
+
 lexeme* lexList;
 int lexIndex;
 

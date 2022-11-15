@@ -196,6 +196,12 @@ sym_type checkReservedSyms(char* name) {
     if (strcmp(name, "else") == 0) {
         return elsesym;
     }
+    if (strcmp(name, "continue") == 0) {
+        return continuesym;
+    }
+    if (strcmp(name, "break") == 0) {
+        return breaksym;
+    }
 
     return identsym;
 }

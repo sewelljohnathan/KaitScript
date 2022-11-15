@@ -8,7 +8,8 @@
 #define MAX_FILE_LENGTH 10000
 
 const char* symNameList[] = {
-    "numsym", "textsym", "identsym", "rawnumsym", "rawtextsym", "assignsym", "functionsym", "loopsym", "fromsym", "tosym",
+    "numsym", "textsym", "identsym", "rawnumsym", "rawtextsym", "assignsym", "functionsym", 
+    "loopsym", "fromsym", "tosym", "continuesym", "breaksym",
     "lparensym", "rparensym", "lbracesym", "rbracesym", "lbracketsym", "rbracketsym",
     "plussym", "subsym", "multsym", "divsym", "expsym",
     "deqsym", "neqsym", "gtrsym", "geqsym", "lsssym", "leqsym",
