@@ -57,3 +57,4 @@ kait
 
 # Development
 devtest.*
+!examples/*.kait
