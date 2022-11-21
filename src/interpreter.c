@@ -1164,7 +1164,19 @@ int textExpression(char* text) {
 
             if (curVar.isFunc) {
                 if (handleFuncCall(curLex)) { return 1; }
-                strcat(bufferText, returnText);
+
+                // Convert num to text
+                if (curVar.type == numtype) {
+                    char converted[MAX_RAWTEXT_LENGTH];
+                    convertNumToText(returnNum, converted);
+                    strcat(bufferText, converted);
+                }
+
+                // strcat text
+                if (curVar.type == texttype) {
+                    strcat(bufferText, returnText);
+                }
+                
             } else {
                 
                 if (curVar.isArr) {
