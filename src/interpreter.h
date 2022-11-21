@@ -11,6 +11,7 @@ char returnTextArr[MAX_ARRAY_LENGTH][MAX_RAWTEXT_LENGTH];
 int returnArrLength;
 varType returnType;
 
+int foundReturn;
 int foundContinue;
 int foundBreak;
 

@@ -14,6 +14,7 @@ int interpretLexList(lexeme* input, int printVarTableFlag) {
     varTableIndex = -1;
     varLevel = 0;
     returnType = nonetype;
+    foundReturn = 0;
     foundContinue = 0;
     foundBreak = 0;
     setStandards();
@@ -482,10 +483,29 @@ int handleFuncCall(lexeme identifier) {
     }
 
     int oldIndex = lexIndex;
+
     // Run the function
     lexIndex = funcVar.funcStart-1;
+    foundReturn = 0;
     while (lexList[lexIndex+1].sym != rbracesym) {
-        if (line()) { return 1; };
+
+        if (!foundReturn) {
+            if (line()) { return 1; };
+        } else {
+
+            // Eat the rest of the code
+            int nestedLevel = 1;
+            lexeme next = nextLex();
+            while (1) {
+
+                if (next.sym == lbracesym) { nestedLevel++; }
+                if (next.sym == rbracesym) { nestedLevel--; }
+                if (next.sym == rbracesym && nestedLevel == 0) { break; }
+                next = nextLex();
+            }
+            lexIndex--;
+            break;
+        }
     }
 
     // }
@@ -749,6 +769,8 @@ int handleIf() {
 }
 
 int handleReturn() {
+
+    foundReturn = 1;
 
     if (returnType == numtype) {
         if (numExpression(&returnNum)) { return 1; }
@@ -1176,7 +1198,7 @@ int textExpression(char* text) {
                 if (curVar.type == texttype) {
                     strcat(bufferText, returnText);
                 }
-                
+
             } else {
                 
                 if (curVar.isArr) {

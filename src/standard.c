@@ -1,11 +1,15 @@
 #include "interpreter.h"
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
 int stdPrint();
 int stdInput();
 int stdStr();
 int stdInt();
+int stdRand();
 
 int checkStandards(char* name) {
 
@@ -31,6 +35,10 @@ int checkStandards(char* name) {
         if (stdInt()) { return 1; }
         inStandards = 1;
     }
+    if (strcmp(name, "random") == 0) {
+        if (stdRand()) { return 1; }
+        inStandards = 1;
+    }
 
     // TODO: move to handleFuncCall
     if (inStandards) {
@@ -52,11 +60,14 @@ int checkStandards(char* name) {
 
 void setStandards() {
 
+    srand(time(NULL));
+
     funcParam funcParams[1];
     addFuncVar("print", funcParams, 0, 0, nonetype);
     addFuncVar("input", funcParams, 0, 0, texttype);
     addFuncVar("str", funcParams, 0, 0, texttype);
     addFuncVar("int", funcParams, 0, 0, numtype);
+    addFuncVar("random", funcParams, 0, 0, numtype);
 }
 
 int stdPrint() {
@@ -92,7 +103,6 @@ int stdStr() {
     double arg;
     if (numExpression(&arg)) { return 1; }
     convertNumToText(arg, returnText);
-    returnType = texttype;
 
     return 0;
 }
@@ -102,7 +112,15 @@ int stdInt() {
     char arg[MAX_RAWTEXT_LENGTH] = "";
     if (textExpression(arg)) { return 1; }
     sscanf(arg, "%lf", &returnNum);
-    returnType = numtype;
+
+    return 0;
+}
+
+int stdRand() {
+
+    printf("%lf | %lf\n", (double) (rand()), ((double) (RAND_MAX)));
+    returnNum = ((double) (rand())) / ((double) (RAND_MAX));
+    printf("%lf\n", returnNum);
 
     return 0;
 }
