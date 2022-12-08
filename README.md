@@ -1,4 +1,4 @@
-# Kait
+# KaitScript
 
 A custom, interpreted programming language.
 
@@ -13,7 +13,7 @@ or
 
 ## Syntax
 
-The syntax for Kait is modeled off languages like Python, but with typing and bracket scoping for functions and loops.
+The syntax for KaitScript is modeled off languages like Python, but with typing and bracket scoping for functions and loops.
 
 ### Variable Declaration
 
